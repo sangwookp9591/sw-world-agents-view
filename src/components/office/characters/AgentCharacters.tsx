@@ -4,25 +4,7 @@ import { useCallback } from 'react';
 import { useOfficeStore } from '@/stores/office-store';
 import { SEAT_POSITIONS } from '../OfficeLayout';
 import { CharacterBillboard } from './CharacterBillboard';
-
-interface AgentConfig {
-  id: string;
-  name: string;
-  role: string;
-}
-
-const AGENT_CONFIG: Readonly<AgentConfig[]> = [
-  { id: 'sam',    name: 'Sam',    role: 'CTO'         },
-  { id: 'klay',   name: 'Klay',   role: 'Architect'   },
-  { id: 'able',   name: 'Able',   role: 'PM'          },
-  { id: 'jay',    name: 'Jay',    role: 'Backend/API'  },
-  { id: 'jerry',  name: 'Jerry',  role: 'Backend/DB'   },
-  { id: 'derek',  name: 'Derek',  role: 'Frontend'     },
-  { id: 'willji', name: 'Willji', role: 'Designer'     },
-  { id: 'rowan',  name: 'Rowan',  role: 'Motion'       },
-  { id: 'milla',  name: 'Milla',  role: 'Security'     },
-  { id: 'iron',   name: 'Iron',   role: 'Wizard'       },
-] as const;
+import { AGENT_CONFIG, AGENT_SCREEN_COLORS } from '@/lib/colors';
 
 export function AgentCharacters() {
   const agents = useOfficeStore((state) => state.agents);
@@ -66,6 +48,7 @@ export function AgentCharacters() {
             position={seat.position}
             name={config.name}
             role={config.role}
+            screenColor={AGENT_SCREEN_COLORS[config.id]}
             agentStatus={agentStatus}
             currentTool={session?.currentTool}
             onSelect={handleSelect}

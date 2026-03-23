@@ -1,14 +1,26 @@
 import type { AgentEvent } from '@/types/session';
 
-class EventBroadcaster {
-  private controllers: Set<ReadableStreamDefaultController> = new Set();
+interface ClientEntry {
+  controller: ReadableStreamDefaultController;
+  /** When set, only events whose sessionId is in this set are forwarded. */
+  sessionFilter: Set<string> | null;
+}
 
-  addClient(controller: ReadableStreamDefaultController): void {
-    this.controllers.add(controller);
+class EventBroadcaster {
+  private clients: Map<ReadableStreamDefaultController, ClientEntry> = new Map();
+
+  addClient(
+    controller: ReadableStreamDefaultController,
+    sessionFilter?: Set<string> | null,
+  ): void {
+    this.clients.set(controller, {
+      controller,
+      sessionFilter: sessionFilter ?? null,
+    });
   }
 
   removeClient(controller: ReadableStreamDefaultController): void {
-    this.controllers.delete(controller);
+    this.clients.delete(controller);
   }
 
   broadcast(event: AgentEvent): void {
@@ -16,21 +28,25 @@ class EventBroadcaster {
     const encoded = new TextEncoder().encode(data);
 
     const dead: ReadableStreamDefaultController[] = [];
-    for (const controller of this.controllers) {
+    for (const entry of this.clients.values()) {
+      // Apply per-client session filter when present
+      if (entry.sessionFilter !== null && !entry.sessionFilter.has(event.sessionId)) {
+        continue;
+      }
       try {
-        controller.enqueue(encoded);
+        entry.controller.enqueue(encoded);
       } catch {
         // Stream already closed
-        dead.push(controller);
+        dead.push(entry.controller);
       }
     }
     for (const c of dead) {
-      this.controllers.delete(c);
+      this.clients.delete(c);
     }
   }
 
   get clientCount(): number {
-    return this.controllers.size;
+    return this.clients.size;
   }
 }
 

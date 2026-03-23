@@ -43,9 +43,10 @@ const TERMINAL_EVENT_TYPES = new Set([
 
 export interface OfficeViewProps {
   readonly sessionId?: string;
+  readonly roomId?: string;
 }
 
-export function OfficeView(_props: Readonly<OfficeViewProps>) {
+export function OfficeView({ roomId }: Readonly<OfficeViewProps>) {
   const selectedAgentId = useOfficeStore((s) => s.selectedAgentId);
   const selectAgent = useOfficeStore((s) => s.selectAgent);
   const approvals = useOfficeStore((s) => s.approvals);
@@ -61,6 +62,9 @@ export function OfficeView(_props: Readonly<OfficeViewProps>) {
 
   const handleEvent = useCallback(
     (event: AgentEvent) => {
+      // Filter events by roomId when in room mode
+      if (roomId && event.roomId && event.roomId !== roomId) return;
+
       if (event.eventType === 'approval_request') {
         const approval = event.payload?.approval as ApprovalRequest | undefined;
         if (approval) addApproval(approval);
@@ -88,7 +92,7 @@ export function OfficeView(_props: Readonly<OfficeViewProps>) {
         setTerminalEvents((prev) => [...prev, event]);
       }
     },
-    [addApproval, removeApproval, addSession, removeSession, updateSessionStatus],
+    [roomId, addApproval, removeApproval, addSession, removeSession, updateSessionStatus],
   );
 
   useSessionEvents(handleEvent);
@@ -115,7 +119,7 @@ export function OfficeView(_props: Readonly<OfficeViewProps>) {
       }}
     >
       {/* Left sidebar */}
-      <AgentSidePanel />
+      <AgentSidePanel roomId={roomId} />
 
       {/* Main column: canvas + terminal + statusbar */}
       <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minWidth: 0 }}>

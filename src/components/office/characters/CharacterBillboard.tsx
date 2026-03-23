@@ -13,6 +13,7 @@ interface CharacterBillboardProps {
   position: [number, number, number];
   name: string;
   role: string;
+  screenColor?: string;
   agentStatus?: 'idle' | 'working' | 'reviewing' | 'blocked';
   currentTool?: string;
   onSelect?: (id: string) => void;
@@ -25,6 +26,7 @@ export function CharacterBillboard({
   position,
   name,
   role,
+  screenColor,
   agentStatus = 'idle',
   currentTool,
   onSelect,
@@ -82,7 +84,8 @@ export function CharacterBillboard({
   }, [agentId]);
 
   // 상태별 색상 표시등
-  const statusColor = agentStatus === 'working' ? '#22c55e'
+  // 작업 중이면 에이전트 고유 색상, 아니면 상태별 색상
+  const statusColor = agentStatus === 'working' ? (screenColor || '#22c55e')
     : agentStatus === 'reviewing' ? '#3b82f6'
     : agentStatus === 'blocked' ? '#ef4444'
     : '#6b7280';

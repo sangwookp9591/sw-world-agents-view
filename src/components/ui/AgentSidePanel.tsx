@@ -1,5 +1,7 @@
 'use client';
 
+import { useCallback, useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useOfficeStore } from '@/stores/office-store';
 
 const STATUS_COLOR: Record<string, string> = {
@@ -30,7 +32,20 @@ function truncateTool(tool?: string): string {
   return tool.length > 22 ? tool.slice(0, 19) + '...' : tool;
 }
 
-export function AgentSidePanel() {
+interface RoomInfo {
+  id: string;
+  name: string;
+  code: string;
+  isPublic: boolean;
+  memberCount: number;
+  maxMembers: number;
+}
+
+export interface AgentSidePanelProps {
+  readonly roomId?: string;
+}
+
+export function AgentSidePanel({ roomId }: Readonly<AgentSidePanelProps>) {
   const sessions = useOfficeStore((s) => s.sessions);
   const selectedAgentId = useOfficeStore((s) => s.selectedAgentId);
   const sidebarOpen = useOfficeStore((s) => s.sidebarOpen);
@@ -39,7 +54,49 @@ export function AgentSidePanel() {
   const approvals = useOfficeStore((s) => s.approvals);
   const setActiveApproval = useOfficeStore((s) => s.setActiveApproval);
 
+  const router = useRouter();
+  const [roomInfo, setRoomInfo] = useState<RoomInfo | null>(null);
+  const [copied, setCopied] = useState(false);
+
   const sessionList = Array.from(sessions.values());
+
+  // Fetch room info when roomId is provided
+  useEffect(() => {
+    if (!roomId) {
+      setRoomInfo(null);
+      return;
+    }
+    let cancelled = false;
+    fetch(`/api/rooms/${encodeURIComponent(roomId)}`)
+      .then((res) => {
+        if (!res.ok) return null;
+        return res.json() as Promise<RoomInfo>;
+      })
+      .then((data) => {
+        if (!cancelled && data) setRoomInfo(data);
+      })
+      .catch(() => {
+        // Ignore fetch errors — room info is non-critical
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [roomId]);
+
+  const handleCopyCode = useCallback(async () => {
+    if (!roomInfo) return;
+    try {
+      await navigator.clipboard.writeText(roomInfo.code);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Ignore clipboard errors
+    }
+  }, [roomInfo]);
+
+  const handleLeaveRoom = useCallback(() => {
+    router.push('/');
+  }, [router]);
 
   return (
     <div
@@ -83,6 +140,123 @@ export function AgentSidePanel() {
 
       {sidebarOpen && (
         <>
+          {/* Room info card — shown only when in room mode */}
+          {roomId && (
+            <div
+              style={{
+                margin: '10px 8px 0',
+                border: '1px solid #FF6B2C',
+                background: '#0a0a14',
+                padding: '10px 10px 8px',
+                flexShrink: 0,
+              }}
+            >
+              {/* Room code row */}
+              <div
+                style={{
+                  fontSize: '11px',
+                  fontFamily: 'Geist Mono, monospace',
+                  color: '#FF6B2C',
+                  fontWeight: 'bold',
+                  letterSpacing: '0.1em',
+                  marginBottom: '4px',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {roomInfo ? roomInfo.code : roomId}
+              </div>
+
+              {/* Room name */}
+              {roomInfo && (
+                <div
+                  style={{
+                    fontSize: '12px',
+                    fontFamily: 'Geist Sans, sans-serif',
+                    color: '#c0c0d8',
+                    marginBottom: '6px',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {roomInfo.name}
+                </div>
+              )}
+
+              {/* Member count + visibility */}
+              {roomInfo && (
+                <div
+                  style={{
+                    fontSize: '10px',
+                    fontFamily: 'Geist Mono, monospace',
+                    color: 'rgba(224,224,240,0.5)',
+                    marginBottom: '8px',
+                    display: 'flex',
+                    gap: '8px',
+                  }}
+                >
+                  <span>{roomInfo.memberCount}/{roomInfo.maxMembers} members</span>
+                  <span style={{ color: '#2a2a4a' }}>|</span>
+                  <span style={{ color: roomInfo.isPublic ? '#22c55e' : '#6b7280' }}>
+                    {roomInfo.isPublic ? 'Public' : 'Private'}
+                  </span>
+                </div>
+              )}
+
+              {/* Action buttons */}
+              <div style={{ display: 'flex', gap: '6px' }}>
+                <button
+                  onClick={handleCopyCode}
+                  aria-label="룸 코드 복사"
+                  style={{
+                    flex: 1,
+                    height: '22px',
+                    background: copied ? '#0a2a0a' : 'transparent',
+                    border: `1px solid ${copied ? '#22c55e' : '#2a2a4a'}`,
+                    borderRadius: 0,
+                    color: copied ? '#22c55e' : '#7070a0',
+                    fontFamily: 'Geist Mono, monospace',
+                    fontSize: '9px',
+                    cursor: 'pointer',
+                    letterSpacing: '0.05em',
+                    transition: 'background 0.15s, border-color 0.15s, color 0.15s',
+                  }}
+                >
+                  {copied ? '[복사됨]' : '코드 복사'}
+                </button>
+                <button
+                  onClick={handleLeaveRoom}
+                  aria-label="룸 나가기"
+                  style={{
+                    flex: 1,
+                    height: '22px',
+                    background: 'transparent',
+                    border: '1px solid #2a2a4a',
+                    borderRadius: 0,
+                    color: '#7070a0',
+                    fontFamily: 'Geist Mono, monospace',
+                    fontSize: '9px',
+                    cursor: 'pointer',
+                    letterSpacing: '0.05em',
+                    transition: 'border-color 0.15s, color 0.15s',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.borderColor = '#ef4444';
+                    e.currentTarget.style.color = '#ef4444';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.borderColor = '#2a2a4a';
+                    e.currentTarget.style.color = '#7070a0';
+                  }}
+                >
+                  나가기
+                </button>
+              </div>
+            </div>
+          )}
+
           {/* Header */}
           <div
             style={{
@@ -94,6 +268,7 @@ export function AgentSidePanel() {
               textTransform: 'uppercase',
               letterSpacing: 1,
               paddingRight: 32,
+              marginTop: roomId ? '8px' : 0,
             }}
           >
             Agents

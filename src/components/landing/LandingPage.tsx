@@ -1,12 +1,18 @@
 'use client';
 
+import { useState } from 'react';
 import { InviteCodeInput } from './InviteCodeInput';
+import { RoomSection } from './RoomSection';
 
 export interface LandingPageProps {
   readonly initialCode?: string | null;
 }
 
+type ActiveTab = 'invite' | 'room';
+
 export function LandingPage({ initialCode }: Readonly<LandingPageProps>) {
+  const [activeTab, setActiveTab] = useState<ActiveTab>('invite');
+
   return (
     <div
       style={{
@@ -25,7 +31,7 @@ export function LandingPage({ initialCode }: Readonly<LandingPageProps>) {
       <header
         style={{
           textAlign: 'center',
-          marginBottom: '64px',
+          marginBottom: '48px',
         }}
       >
         {/* Pixel-style logo block */}
@@ -77,7 +83,7 @@ export function LandingPage({ initialCode }: Readonly<LandingPageProps>) {
         </p>
       </header>
 
-      {/* === Main card — Invite Code Entry === */}
+      {/* === Main card with tabs === */}
       <main
         style={{
           width: '100%',
@@ -85,46 +91,92 @@ export function LandingPage({ initialCode }: Readonly<LandingPageProps>) {
           background: '#0e0e1a',
           border: '2px solid #2a2a4a',
           boxShadow: '6px 6px 0px #08080f',
-          padding: '36px',
           display: 'flex',
           flexDirection: 'column',
-          alignItems: 'center',
-          gap: '24px',
         }}
       >
-        {/* Card header */}
+        {/* Tab bar */}
         <div
           style={{
-            width: '100%',
+            display: 'flex',
             borderBottom: '1px solid #1e1e3a',
-            paddingBottom: '16px',
           }}
+          role="tablist"
+          aria-label="입장 방식 선택"
         >
-          <p
-            style={{
-              margin: 0,
-              fontSize: '12px',
-              color: '#4a4a7a',
-              textTransform: 'uppercase',
-              letterSpacing: '0.15em',
-            }}
-          >
-            {'>'} 초대 코드 입력
-          </p>
+          <TabButton
+            label="초대 코드"
+            active={activeTab === 'invite'}
+            onClick={() => setActiveTab('invite')}
+            id="tab-invite"
+            panelId="panel-invite"
+          />
+          <TabButton
+            label="룸 입장"
+            active={activeTab === 'room'}
+            onClick={() => setActiveTab('room')}
+            id="tab-room"
+            panelId="panel-room"
+          />
         </div>
 
-        <InviteCodeInput initialCode={initialCode} />
+        {/* Tab panels */}
+        <div style={{ padding: '28px 36px 36px' }}>
+          {/* Invite Code Panel */}
+          <div
+            id="panel-invite"
+            role="tabpanel"
+            aria-labelledby="tab-invite"
+            hidden={activeTab !== 'invite'}
+          >
+            {activeTab === 'invite' && (
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '24px' }}>
+                <div
+                  style={{
+                    width: '100%',
+                    borderBottom: '1px solid #1e1e3a',
+                    paddingBottom: '16px',
+                  }}
+                >
+                  <p
+                    style={{
+                      margin: 0,
+                      fontSize: '12px',
+                      color: '#4a4a7a',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.15em',
+                    }}
+                  >
+                    {'>'} 초대 코드 입력
+                  </p>
+                </div>
 
-        <p
-          style={{
-            fontSize: '12px',
-            color: '#3a3a5a',
-            textAlign: 'center',
-            margin: 0,
-          }}
-        >
-          형식: XXXX-XXXX &nbsp;|&nbsp; 예: IRON-7K2X
-        </p>
+                <InviteCodeInput initialCode={initialCode} />
+
+                <p
+                  style={{
+                    fontSize: '12px',
+                    color: '#3a3a5a',
+                    textAlign: 'center',
+                    margin: 0,
+                  }}
+                >
+                  형식: XXXX-XXXX &nbsp;|&nbsp; 예: IRON-7K2X
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Room Panel */}
+          <div
+            id="panel-room"
+            role="tabpanel"
+            aria-labelledby="tab-room"
+            hidden={activeTab !== 'room'}
+          >
+            {activeTab === 'room' && <RoomSection />}
+          </div>
+        </div>
       </main>
 
       {/* === Footer — Create new office === */}
@@ -200,5 +252,52 @@ export function LandingPage({ initialCode }: Readonly<LandingPageProps>) {
         </p>
       </footer>
     </div>
+  );
+}
+
+/* ---- Tab Button ---- */
+
+interface TabButtonProps {
+  readonly label: string;
+  readonly active: boolean;
+  readonly onClick: () => void;
+  readonly id: string;
+  readonly panelId: string;
+}
+
+function TabButton({ label, active, onClick, id, panelId }: Readonly<TabButtonProps>) {
+  return (
+    <button
+      id={id}
+      role="tab"
+      aria-selected={active}
+      aria-controls={panelId}
+      onClick={onClick}
+      style={{
+        flex: 1,
+        height: '44px',
+        background: active ? '#12121e' : 'transparent',
+        border: 'none',
+        borderBottom: active ? '2px solid #FF6B2C' : '2px solid transparent',
+        borderRadius: 0,
+        color: active ? '#FF6B2C' : '#4a4a7a',
+        fontFamily: 'monospace',
+        fontSize: '12px',
+        fontWeight: active ? 'bold' : 'normal',
+        cursor: 'pointer',
+        letterSpacing: '0.1em',
+        textTransform: 'uppercase',
+        transition: 'color 0.15s, border-color 0.15s, background 0.15s',
+        marginBottom: '-1px',
+      }}
+      onMouseEnter={(e) => {
+        if (!active) e.currentTarget.style.color = '#a0a0c0';
+      }}
+      onMouseLeave={(e) => {
+        if (!active) e.currentTarget.style.color = '#4a4a7a';
+      }}
+    >
+      {label}
+    </button>
   );
 }

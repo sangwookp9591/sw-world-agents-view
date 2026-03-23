@@ -29,9 +29,10 @@ function PageContent() {
   const searchParams = useSearchParams();
   const sessionParam = searchParams.get('session');
   const codeParam = searchParams.get('code');
+  const roomParam = searchParams.get('room');
 
-  if (sessionParam) {
-    return <OfficeView sessionId={sessionParam} />;
+  if (sessionParam || roomParam) {
+    return <OfficeView sessionId={sessionParam ?? undefined} roomId={roomParam ?? undefined} />;
   }
 
   return <LandingPage initialCode={codeParam} />;

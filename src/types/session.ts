@@ -24,6 +24,7 @@ export interface AgentEvent {
   sessionId: string;
   userId: string;
   agentName: string;
+  roomId?: string;
   eventType:
     | 'register'
     | 'tool_start'

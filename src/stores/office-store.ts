@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import type { AgentState } from '@/types/agent';
 import type { RegisteredSession, ApprovalRequest } from '@/types/session';
+import type { Room } from '@/lib/relay/room-registry';
 
 interface OfficeStore {
   agents: Map<string, AgentState>;
@@ -8,6 +9,11 @@ interface OfficeStore {
   sessions: Map<string, RegisteredSession>;
   sidebarOpen: boolean;
   hoveredAgentId: string | null;
+
+  // Room state
+  currentRoomId: string | null;
+  currentRoom: Room | null;
+  setCurrentRoom: (room: Room | null) => void;
 
   // Approval state
   approvals: ApprovalRequest[];
@@ -44,6 +50,8 @@ export const useOfficeStore = create<OfficeStore>((set) => ({
   sessions: new Map(),
   sidebarOpen: true,
   hoveredAgentId: null,
+  currentRoomId: null,
+  currentRoom: null,
   approvals: [],
   activeApprovalId: null,
 
@@ -71,6 +79,8 @@ export const useOfficeStore = create<OfficeStore>((set) => ({
     }),
 
   selectAgent: (id) => set({ selectedAgentId: id }),
+
+  setCurrentRoom: (room) => set({ currentRoom: room, currentRoomId: room?.id ?? null }),
 
   toggleSidebar: () => set((state) => ({ sidebarOpen: !state.sidebarOpen })),
   setHoveredAgent: (id) => set({ hoveredAgentId: id }),
