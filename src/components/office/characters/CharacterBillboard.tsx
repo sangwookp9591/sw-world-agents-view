@@ -112,26 +112,29 @@ export function CharacterBillboard({
     };
   }, [agentId]);
 
+  // idle 걸어다니기 — 데스크 주변 원형 산책
+  const walkRadius = 1.5;
+  const walkSpeed = 0.3;
+
   // 애니메이션 프레임
   useFrame(({ clock }) => {
     if (!meshRef.current) return;
 
-    // idle 부유 애니메이션
-    if (agentStatus === 'idle') {
-      meshRef.current.position.y = Math.sin(clock.elapsedTime * 1.5 + idleOffset) * 0.03;
-      meshRef.current.scale.set(1, 1, 1);
-    }
+    const isWorking = agentStatus === 'working' || agentStatus === 'reviewing';
 
-    // working 스케일 펄스
-    if (agentStatus === 'working') {
+    if (isWorking) {
+      // 작업 중: 데스크에 앉아서 작업 (원래 위치)
+      meshRef.current.position.x = 0;
       meshRef.current.position.y = 0;
-      const pulse = 1.0 + Math.sin(clock.elapsedTime * 3) * 0.025;
+      meshRef.current.position.z = 0;
+      const pulse = 1.0 + Math.sin(clock.elapsedTime * 3) * 0.02;
       meshRef.current.scale.set(pulse, pulse, 1);
-    }
-
-    // idle/working 외 상태: 리셋
-    if (agentStatus !== 'idle' && agentStatus !== 'working') {
-      meshRef.current.position.y = 0;
+    } else {
+      // idle/blocked: 데스크 주변을 걸어다님
+      const t = clock.elapsedTime * walkSpeed + idleOffset;
+      meshRef.current.position.x = Math.sin(t) * walkRadius;
+      meshRef.current.position.y = Math.sin(t * 2) * 0.05; // 살짝 바운스
+      meshRef.current.position.z = Math.cos(t) * walkRadius * 0.7;
       meshRef.current.scale.set(1, 1, 1);
     }
 
@@ -228,11 +231,11 @@ export function CharacterBillboard({
       <Text
         position={[0, 0.68, 0.01]}
         fontSize={0.16}
-        color="#ffffff"
+        color="#2D3436"
         anchorX="center"
         anchorY="bottom"
         outlineWidth={0.02}
-        outlineColor="#000000"
+        outlineColor="#ffffff"
         font={undefined}
       >
         {name}
@@ -242,11 +245,11 @@ export function CharacterBillboard({
       <Text
         position={[0, 0.55, 0.01]}
         fontSize={0.10}
-        color="#FFB088"
+        color="#FF6B2C"
         anchorX="center"
         anchorY="bottom"
         outlineWidth={0.015}
-        outlineColor="#000000"
+        outlineColor="#ffffff"
         font={undefined}
       >
         {role}

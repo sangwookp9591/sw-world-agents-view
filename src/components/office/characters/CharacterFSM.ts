@@ -15,7 +15,7 @@ export function agentStatusToCharacterState(
       return 'idle';
     case 'idle':
     default:
-      return 'idle';
+      return 'walking'; // idle 에이전트는 걸어다님
   }
 }
 

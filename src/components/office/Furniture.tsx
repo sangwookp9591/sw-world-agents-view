@@ -79,30 +79,35 @@ export function Monitor({ position }: Readonly<PositionProps>) {
 
   return (
     <group>
-      {/* 화면 프레임 — 슬림 실버 */}
-      <mesh position={[x, y + 1.05, z]}>
-        <boxGeometry args={[0.45, 0.32, 0.02]} />
-        <meshStandardMaterial color="#e8e8e8" roughness={0.3} metalness={0.4} />
+      {/* 노트북 베이스 (키보드 부분) — 데스크 위에 납작하게 */}
+      <mesh position={[x, y + 0.785, z]}>
+        <boxGeometry args={[0.38, 0.015, 0.26]} />
+        <meshStandardMaterial color="#e0e0e0" roughness={0.3} metalness={0.5} />
       </mesh>
-      {/* 화면 (오렌지 발광) */}
-      <mesh position={[x, y + 1.05, z + 0.011]}>
-        <boxGeometry args={[0.40, 0.27, 0.001]} />
+      {/* 키보드 영역 */}
+      <mesh position={[x, y + 0.793, z + 0.02]}>
+        <boxGeometry args={[0.32, 0.003, 0.16]} />
+        <meshStandardMaterial color="#c8c8c8" roughness={0.5} />
+      </mesh>
+      {/* 트랙패드 */}
+      <mesh position={[x, y + 0.793, z + 0.10]}>
+        <boxGeometry args={[0.10, 0.002, 0.07]} />
+        <meshStandardMaterial color="#d8d8d8" roughness={0.3} />
+      </mesh>
+      {/* 스크린 (기울어진 상태) */}
+      <mesh position={[x, y + 0.92, z - 0.12]} rotation={[0.25, 0, 0]}>
+        <boxGeometry args={[0.36, 0.24, 0.008]} />
+        <meshStandardMaterial color="#e0e0e0" roughness={0.3} metalness={0.5} />
+      </mesh>
+      {/* 스크린 디스플레이 (오렌지 발광) */}
+      <mesh position={[x, y + 0.92, z - 0.116]} rotation={[0.25, 0, 0]}>
+        <boxGeometry args={[0.32, 0.20, 0.001]} />
         <meshStandardMaterial
           color="#FF6B2C"
           emissive="#FF6B2C"
-          emissiveIntensity={0.4}
+          emissiveIntensity={0.35}
           roughness={0.1}
         />
-      </mesh>
-      {/* 스탠드 */}
-      <mesh position={[x, y + 0.85, z - 0.005]}>
-        <boxGeometry args={[0.03, 0.2, 0.03]} />
-        <meshStandardMaterial color="#d0d0d0" metalness={0.4} roughness={0.3} />
-      </mesh>
-      {/* 베이스 */}
-      <mesh position={[x, y + 0.77, z + 0.02]}>
-        <boxGeometry args={[0.18, 0.02, 0.12]} />
-        <meshStandardMaterial color="#d0d0d0" metalness={0.4} roughness={0.3} />
       </mesh>
     </group>
   );
