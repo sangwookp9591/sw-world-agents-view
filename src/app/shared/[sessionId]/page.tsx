@@ -2,7 +2,6 @@
 
 import { useEffect, useState, use } from 'react';
 import { useSessionEvents } from '@/hooks/useSessionEvents';
-import { SWKIT_COLORS } from '@/lib/colors';
 import type { AgentEvent, RegisteredSession } from '@/types/session';
 
 export default function SharedSessionPage({ params }: { params: Promise<{ sessionId: string }> }) {
@@ -29,16 +28,7 @@ export default function SharedSessionPage({ params }: { params: Promise<{ sessio
 
   if (error) {
     return (
-      <div style={{
-        background: '#FFFFFF',
-        color: SWKIT_COLORS.terminalRed,
-        height: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        fontFamily: 'system-ui, -apple-system, sans-serif',
-        fontSize: 16,
-      }}>
+      <div className="flex h-screen items-center justify-center bg-white font-sans text-base text-red-500">
         {error}
       </div>
     );
@@ -46,142 +36,68 @@ export default function SharedSessionPage({ params }: { params: Promise<{ sessio
 
   if (!session) {
     return (
-      <div style={{
-        background: '#FFFFFF',
-        color: SWKIT_COLORS.primary,
-        height: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        fontFamily: 'system-ui, -apple-system, sans-serif',
-        fontSize: 14,
-      }}>
+      <div className="flex h-screen items-center justify-center bg-white font-sans text-sm text-swkit-orange">
         Loading session...
       </div>
     );
   }
 
-  const statusColor = session.status === 'active' ? SWKIT_COLORS.statusActive
-    : session.status === 'idle' ? SWKIT_COLORS.statusIdle
-    : session.status === 'waiting' ? SWKIT_COLORS.statusBlocked
-    : SWKIT_COLORS.statusOffline;
+  const statusClass = session.status === 'active' ? 'bg-status-active shadow-[0_0_6px_rgba(34,197,94,0.33)]'
+    : session.status === 'idle' ? 'bg-status-idle shadow-[0_0_6px_rgba(234,179,8,0.33)]'
+    : session.status === 'waiting' ? 'bg-status-blocked shadow-[0_0_6px_rgba(239,68,68,0.33)]'
+    : 'bg-status-offline';
 
   return (
-    <div style={{
-      background: '#FFFFFF',
-      color: SWKIT_COLORS.dark,
-      height: '100vh',
-      fontFamily: 'system-ui, -apple-system, sans-serif',
-      display: 'flex',
-      flexDirection: 'column',
-    }}>
+    <div className="flex h-screen flex-col bg-white font-sans text-swkit-dark">
       {/* 헤더 */}
-      <div style={{
-        padding: '16px 24px',
-        borderBottom: `1px solid rgba(255, 107, 44, 0.15)`,
-        background: SWKIT_COLORS.lightBg,
-        display: 'flex',
-        alignItems: 'center',
-        gap: 16,
-      }}>
-        <div style={{
-          width: 10,
-          height: 10,
-          borderRadius: '50%',
-          background: statusColor,
-          boxShadow: `0 0 6px ${statusColor}55`,
-        }} />
+      <div className="flex items-center gap-4 border-b border-swkit-orange/15 bg-swkit-light px-6 py-4">
+        <div className={`h-2.5 w-2.5 rounded-full ${statusClass}`} />
         <div>
-          <div style={{ fontSize: 18, fontWeight: 700, color: SWKIT_COLORS.dark }}>
-            {session.agentName}
-          </div>
-          <div style={{ fontSize: 12, color: SWKIT_COLORS.muted }}>
+          <div className="text-lg font-bold text-swkit-dark">{session.agentName}</div>
+          <div className="text-xs text-swkit-muted">
             {session.agentRole} | {session.teamId} | Session: {sessionId.slice(0, 8)}...
           </div>
         </div>
         {session.sharing?.allowRemoteControl && (
-          <div style={{
-            marginLeft: 'auto',
-            padding: '4px 12px',
-            background: `${SWKIT_COLORS.statusActive}15`,
-            border: `1px solid ${SWKIT_COLORS.statusActive}`,
-            borderRadius: 20,
-            color: SWKIT_COLORS.statusActive,
-            fontSize: 12,
-            fontWeight: 600,
-          }}>
+          <div className="ml-auto rounded-full border border-status-active bg-status-active/10 px-3 py-1 text-xs font-semibold text-status-active">
             RC Available
           </div>
         )}
         {session.currentTool && (
-          <div style={{
-            padding: '4px 12px',
-            background: `${SWKIT_COLORS.primary}12`,
-            border: `1px solid ${SWKIT_COLORS.primary}`,
-            borderRadius: 20,
-            color: SWKIT_COLORS.primary,
-            fontSize: 12,
-            fontWeight: 600,
-          }}>
+          <div className="rounded-full border border-swkit-orange bg-swkit-orange/10 px-3 py-1 text-xs font-semibold text-swkit-orange">
             {session.currentTool}
           </div>
         )}
         <a
           href="/"
-          style={{
-            marginLeft: session.sharing?.allowRemoteControl ? 0 : 'auto',
-            color: SWKIT_COLORS.primary,
-            fontSize: 13,
-            fontWeight: 600,
-            textDecoration: 'none',
-          }}
+          className={`text-[13px] font-semibold text-swkit-orange no-underline hover:text-swkit-orange-hover ${session.sharing?.allowRemoteControl ? '' : 'ml-auto'}`}
         >
           &larr; Office
         </a>
       </div>
 
       {/* 이벤트 로그 */}
-      <div style={{ flex: 1, overflow: 'auto', padding: '12px 24px' }}>
+      <div className="flex-1 overflow-auto px-6 py-3">
         {events.length === 0 ? (
-          <div style={{
-            color: SWKIT_COLORS.muted,
-            textAlign: 'center',
-            marginTop: 60,
-            fontSize: 14,
-          }}>
+          <div className="mt-15 text-center text-sm text-swkit-muted">
             이벤트 대기 중... 이 세션에서 도구를 사용하면 여기에 표시됩니다.
           </div>
         ) : (
           events.map((e, i) => {
             const time = new Date(e.timestamp).toLocaleTimeString();
-            const typeColor = e.eventType === 'tool_start' ? '#3b82f6'
-              : e.eventType === 'tool_done' ? SWKIT_COLORS.statusActive
-              : e.eventType === 'status_change' ? SWKIT_COLORS.statusIdle
-              : SWKIT_COLORS.muted;
+            const typeColorClass = e.eventType === 'tool_start' ? 'text-blue-500'
+              : e.eventType === 'tool_done' ? 'text-status-active'
+              : e.eventType === 'status_change' ? 'text-status-idle'
+              : 'text-swkit-muted';
             return (
-              <div key={i} style={{
-                padding: '6px 0',
-                borderBottom: '1px solid rgba(255, 107, 44, 0.08)',
-                fontSize: 13,
-              }}>
-                <span style={{ color: SWKIT_COLORS.muted, fontFamily: 'monospace', fontSize: 12 }}>
-                  {time}
-                </span>
+              <div key={i} className="border-b border-swkit-orange/[0.08] py-1.5 text-[13px]">
+                <span className="font-mono text-xs text-swkit-muted">{time}</span>
                 {' '}
-                <span style={{
-                  color: typeColor,
-                  fontWeight: 600,
-                  fontFamily: 'monospace',
-                  fontSize: 12,
-                }}>
+                <span className={`font-mono text-xs font-semibold ${typeColorClass}`}>
                   [{e.eventType}]
                 </span>
                 {' '}
-                {e.toolName && (
-                  <span style={{ color: SWKIT_COLORS.dark }}>
-                    {e.toolName}
-                  </span>
-                )}
+                {e.toolName && <span className="text-swkit-dark">{e.toolName}</span>}
               </div>
             );
           })
@@ -189,17 +105,9 @@ export default function SharedSessionPage({ params }: { params: Promise<{ sessio
       </div>
 
       {/* 하단 상태 */}
-      <div style={{
-        padding: '10px 24px',
-        borderTop: '1px solid rgba(255, 107, 44, 0.15)',
-        background: SWKIT_COLORS.lightBg,
-        fontSize: 11,
-        color: SWKIT_COLORS.muted,
-        display: 'flex',
-        justifyContent: 'space-between',
-      }}>
+      <div className="flex justify-between border-t border-swkit-orange/15 bg-swkit-light px-6 py-2.5 text-[11px] text-swkit-muted">
         <span>Events: {events.length}</span>
-        <span style={{ fontFamily: 'monospace', fontSize: 10 }}>
+        <span className="font-mono text-[10px]">
           {typeof window !== 'undefined' ? window.location.href : ''}
         </span>
       </div>

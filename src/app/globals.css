@@ -29,9 +29,24 @@
   --font-mono: var(--font-geist-mono);
 
   --color-swkit-orange: #FF6B2C;
+  --color-swkit-orange-hover: #FF8F5C;
   --color-swkit-dark: #2D3436;
   --color-swkit-light: #FFF8F3;
   --color-swkit-muted: rgba(45, 52, 54, 0.6);
+
+  /* Status */
+  --color-status-active: #22c55e;
+  --color-status-idle: #eab308;
+  --color-status-blocked: #ef4444;
+  --color-status-offline: #6b7280;
+
+  /* Office dark */
+  --color-office-bg: #0a0a0f;
+  --color-office-surface: #12121e;
+  --color-office-elevated: #1a1a2e;
+  --color-office-border: #2a2a3e;
+  --color-office-text: #e0e0f0;
+  --color-office-muted: rgba(224, 224, 240, 0.6);
 }
 
 html,
