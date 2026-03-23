@@ -1,0 +1,17 @@
+{
+  "name": "swkit-3d-mcp",
+  "version": "0.1.0",
+  "type": "module",
+  "bin": { "swkit-3d-mcp": "./dist/server.js" },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx src/server.ts"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "latest"
+  },
+  "devDependencies": {
+    "tsx": "latest",
+    "typescript": "^5"
+  }
+}
