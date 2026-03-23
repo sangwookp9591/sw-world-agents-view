@@ -12,6 +12,7 @@ const VALID_EVENT_TYPES = [
   'unregister',
   'approval_request',
   'approval_resolved',
+  'command',
 ] as const;
 
 export async function POST(req: NextRequest) {
