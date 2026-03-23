@@ -11,10 +11,10 @@
  * 설정: settings.json → hooks.SessionStart
  */
 
-const RELAY_URL = process.env.SWKIT_OFFICE_URL || 'http://localhost:3000';
-const TEAM_ID = process.env.SWKIT_TEAM_ID || 'default';
-const AGENT_NAME = process.env.SWKIT_AGENT_NAME || process.env.USER || 'unknown';
-const AGENT_ROLE = process.env.SWKIT_AGENT_ROLE || 'developer';
+import { readStdin, getConfig, sendEvent, debugLog } from './lib.mjs';
+
+const config = getConfig();
+const { serverUrl: RELAY_URL, teamId: TEAM_ID, agentName: AGENT_NAME, agentRole: AGENT_ROLE, relaySecret } = config;
 
 async function register() {
   try {
@@ -49,14 +49,12 @@ async function register() {
       },
     };
 
-    const res = await fetch(`${RELAY_URL}/api/relay/register`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(process.env.RELAY_SECRET ? { 'x-relay-secret': process.env.RELAY_SECRET } : {}),
-      },
-      body: JSON.stringify(body),
-    });
+    const res = await sendEvent(
+      RELAY_URL,
+      '/api/relay/register',
+      body,
+      relaySecret ? { 'x-relay-secret': relaySecret } : {},
+    );
 
     if (!res.ok) {
       console.error('[swkit-3d] ❌ 세션 등록 실패');
@@ -83,7 +81,8 @@ async function register() {
     console.error('[swkit-3d] ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
     console.error('');
 
-  } catch {
+  } catch (err) {
+    debugLog('session register failed', err);
     // 연결 실패 시 무시 (Office가 실행 안 중일 수 있음)
   }
 }
@@ -95,15 +94,6 @@ async function checkServer(url) {
   } catch {
     return false;
   }
-}
-
-function readStdin() {
-  return new Promise((resolve) => {
-    let data = '';
-    process.stdin.on('data', (chunk) => data += chunk);
-    process.stdin.on('end', () => resolve(data || '{}'));
-    setTimeout(() => resolve(data || '{}'), 1000);
-  });
 }
 
 register();

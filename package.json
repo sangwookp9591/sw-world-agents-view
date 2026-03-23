@@ -1,7 +1,10 @@
 {
   "name": "swkit-office",
-  "version": "0.1.0",
+  "version": "2.1.5",
   "private": true,
+  "bin": {
+    "swkit-office": "./bin/agent-ui.mjs"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",

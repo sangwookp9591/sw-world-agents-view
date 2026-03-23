@@ -1,41 +1,133 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# swkit-office
 
-## Getting Started
+3D agent office viewer — Claude Code 세션을 실시간 3D 오피스로 시각화
 
-First, run the development server:
+Claude Code를 실행하는 팀원들이 3D 사무실 공간에 캐릭터로 등장하며, 도구 사용(Read, Write, Bash 등)에 따라 애니메이션이 실시간으로 반영됩니다.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+---
+
+## 아키텍처
+
+```
+팀원 A: claude (hooks 자동 전송)  ──┐
+팀원 B: claude (hooks 자동 전송)  ──┼──→  swkit-office (Vercel)  ←── 브라우저 접속
+팀원 C: claude (hooks 자동 전송)  ──┘     https://office.team.dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Quick Start
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+# 1. 레포 클론
+git clone https://github.com/your-org/swkit-office.git
 
-## Learn More
+# 2. 의존성 설치
+npm install
 
-To learn more about Next.js, take a look at the following resources:
+# 3. 개발 서버 실행
+npm run dev
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+브라우저에서 [http://localhost:3000](http://localhost:3000) 접속.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
+## 환경변수
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### 서버 측 (Vercel)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-# sw-world-agents-view
-# sw-world-agents-view
-# sw-world-agents-view
-# sw-office
-# sw-world-agents-view
+| 변수 | 필수 | 기본값 | 설명 |
+|------|------|--------|------|
+| `RELAY_SECRET` | 선택 | (없음) | API 인증 시크릿. 미설정 시 인증 스킵 |
+
+### 클라이언트 측 (hooks / Claude Code settings)
+
+| 변수 | 필수 | 기본값 | 설명 |
+|------|------|--------|------|
+| `SWKIT_OFFICE_URL` | 필수 | hooks: `http://localhost:3000` / CLI: `https://office.sw-world.site` | Office 서버 URL |
+| `SWKIT_TEAM_ID` | 필수 | — | 팀 식별자 |
+| `SWKIT_AGENT_NAME` | 선택 | `$USER` | 3D 오피스에 표시될 이름 |
+| `SWKIT_AGENT_ROLE` | 선택 | `developer` | 역할 레이블 |
+
+> `SWKIT_OFFICE_URL` 기본값 주의: hooks 스크립트는 `http://localhost:3000`(로컬), CLI 직접 실행은 `https://office.sw-world.site`(프로덕션)을 기본값으로 사용합니다. 팀 배포 환경에서는 반드시 명시적으로 지정하세요.
+
+---
+
+## 연결 방법
+
+### 방법 A: Claude Code Hooks (권장 — 완전 자동)
+
+Claude Code가 세션을 시작하거나 도구를 사용할 때 자동으로 3D Office에 이벤트를 전송합니다.
+
+`~/.claude/settings.json`에 추가:
+
+```jsonc
+{
+  "env": {
+    "SWKIT_OFFICE_URL": "https://office.your-team.dev",
+    "SWKIT_TEAM_ID": "your-team",
+    "SWKIT_AGENT_NAME": "your-name",
+    "SWKIT_AGENT_ROLE": "developer",
+    "RELAY_SECRET": "sk-office-your-random-secret"
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node ~/swkit-office/scripts/hooks/session-connect.mjs"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node ~/swkit-office/scripts/hooks/tool-reporter.mjs"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+이후 `claude` 실행만 하면 자동으로 3D Office에 등장합니다.
+
+### 방법 B: MCP 플러그인 (수동 도구 사용)
+
+```jsonc
+// ~/.claude/settings.json
+{
+  "mcpServers": {
+    "swkit-3d-office": {
+      "command": "npx",
+      "args": ["tsx", "~/swkit-office/packages/mcp-plugin/src/server.ts"],
+      "env": {
+        "OFFICE_RELAY_URL": "https://office.your-team.dev",
+        "TEAM_ID": "your-team"
+      }
+    }
+  }
+}
+```
+
+자세한 설정은 [DEPLOY.md](./DEPLOY.md) 참조.
+
+---
+
+## 기술 스택
+
+| 영역 | 기술 |
+|------|------|
+| 프레임워크 | Next.js 16 (App Router) |
+| 3D 렌더링 | React Three Fiber |
+| 상태 관리 | Zustand |
+| 언어 | TypeScript |
+| 배포 | Vercel |

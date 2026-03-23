@@ -6,9 +6,9 @@
  * 설정: settings.json → hooks.PreToolUse
  */
 
-const RELAY_URL = process.env.SWKIT_OFFICE_URL || 'http://localhost:3000';
-const TEAM_ID = process.env.SWKIT_TEAM_ID || 'default';
-const AGENT_NAME = process.env.SWKIT_AGENT_NAME || process.env.USER || 'unknown';
+import { readStdin, getConfig, sendEvent, debugLog } from './lib.mjs';
+
+const { serverUrl: RELAY_URL, teamId: TEAM_ID, agentName: AGENT_NAME, relaySecret } = getConfig();
 
 async function report() {
   try {
@@ -16,13 +16,10 @@ async function report() {
     const toolName = input.tool_name || 'unknown';
     const sessionId = input.session_id || `session-${process.pid}`;
 
-    await fetch(`${RELAY_URL}/api/relay/event`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(process.env.RELAY_SECRET ? { 'x-relay-secret': process.env.RELAY_SECRET } : {}),
-      },
-      body: JSON.stringify({
+    await sendEvent(
+      RELAY_URL,
+      '/api/relay/event',
+      {
         teamId: TEAM_ID,
         sessionId,
         userId: process.env.USER || 'unknown',
@@ -30,20 +27,13 @@ async function report() {
         eventType: 'tool_start',
         toolName,
         timestamp: Date.now(),
-      }),
-    });
-  } catch {
+      },
+      relaySecret ? { 'x-relay-secret': relaySecret } : {},
+    );
+  } catch (err) {
+    debugLog('event send failed', err);
     // 연결 실패 시 무시
   }
-}
-
-function readStdin() {
-  return new Promise((resolve) => {
-    let data = '';
-    process.stdin.on('data', (chunk) => data += chunk);
-    process.stdin.on('end', () => resolve(data || '{}'));
-    setTimeout(() => resolve(data || '{}'), 1000);
-  });
 }
 
 report();

@@ -85,6 +85,17 @@ claude settings
           }
         ]
       }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node ~/swkit-office/scripts/hooks/tool-done-reporter.mjs"
+          }
+        ]
+      }
     ]
   }
 }
