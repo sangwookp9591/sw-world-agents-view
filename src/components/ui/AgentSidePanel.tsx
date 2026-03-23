@@ -61,7 +61,6 @@ export function AgentSidePanel({ roomId }: Readonly<AgentSidePanelProps>) {
 
   const sessionList = Array.from(sessions.values());
 
-  // Fetch room info when roomId is provided
   useEffect(() => {
     if (!roomId) {
       setRoomInfo(null);
@@ -76,9 +75,7 @@ export function AgentSidePanel({ roomId }: Readonly<AgentSidePanelProps>) {
       .then((data) => {
         if (!cancelled && data) setRoomInfo(data);
       })
-      .catch(() => {
-        // Ignore fetch errors — room info is non-critical
-      });
+      .catch(() => {});
     return () => {
       cancelled = true;
     };
@@ -90,9 +87,7 @@ export function AgentSidePanel({ roomId }: Readonly<AgentSidePanelProps>) {
       await navigator.clipboard.writeText(roomInfo.code);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
-    } catch {
-      // Ignore clipboard errors
-    }
+    } catch {}
   }, [roomInfo]);
 
   const handleLeaveRoom = useCallback(() => {
@@ -101,156 +96,53 @@ export function AgentSidePanel({ roomId }: Readonly<AgentSidePanelProps>) {
 
   return (
     <div
-      style={{
-        width: sidebarOpen ? 256 : 32,
-        background: '#0f0f17',
-        borderRight: '1px solid #1e1e3a',
-        display: 'flex',
-        flexDirection: 'column',
-        flexShrink: 0,
-        transition: 'width 0.15s ease',
-        overflow: 'hidden',
-        position: 'relative',
-      }}
+      className="relative flex shrink-0 flex-col overflow-hidden border-r border-swkit-orange/15 bg-white transition-[width] duration-150"
+      style={{ width: sidebarOpen ? 256 : 32 }}
     >
       {/* Toggle button */}
       <button
         onClick={toggleSidebar}
         title={sidebarOpen ? 'Collapse' : 'Expand'}
-        style={{
-          position: 'absolute',
-          top: 8,
-          right: 6,
-          zIndex: 10,
-          width: 20,
-          height: 20,
-          background: '#1a1a2e',
-          border: '1px solid #2a2a4a',
-          borderRadius: 0,
-          color: '#7070a0',
-          cursor: 'pointer',
-          fontSize: 10,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: 0,
-        }}
+        className="absolute right-1.5 top-2 z-10 flex h-5 w-5 cursor-pointer items-center justify-center border border-swkit-orange/20 bg-swkit-light text-[10px] text-swkit-muted hover:border-swkit-orange hover:text-swkit-orange"
       >
         {sidebarOpen ? '‹' : '›'}
       </button>
 
       {sidebarOpen && (
         <>
-          {/* Room info card — shown only when in room mode */}
+          {/* Room info card */}
           {roomId && (
-            <div
-              style={{
-                margin: '10px 8px 0',
-                border: '1px solid #FF6B2C',
-                background: '#0a0a14',
-                padding: '10px 10px 8px',
-                flexShrink: 0,
-              }}
-            >
-              {/* Room code row */}
-              <div
-                style={{
-                  fontSize: '11px',
-                  fontFamily: 'Geist Mono, monospace',
-                  color: '#FF6B2C',
-                  fontWeight: 'bold',
-                  letterSpacing: '0.1em',
-                  marginBottom: '4px',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap',
-                }}
-              >
+            <div className="mx-2 mt-2.5 shrink-0 border border-swkit-orange bg-swkit-light p-2.5 pb-2">
+              <div className="mb-1 overflow-hidden text-ellipsis whitespace-nowrap font-mono text-[11px] font-bold tracking-wider text-swkit-orange">
                 {roomInfo ? roomInfo.code : roomId}
               </div>
-
-              {/* Room name */}
               {roomInfo && (
-                <div
-                  style={{
-                    fontSize: '12px',
-                    fontFamily: 'Geist Sans, sans-serif',
-                    color: '#c0c0d8',
-                    marginBottom: '6px',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
-                  }}
-                >
+                <div className="mb-1.5 overflow-hidden text-ellipsis whitespace-nowrap font-sans text-xs text-swkit-dark">
                   {roomInfo.name}
                 </div>
               )}
-
-              {/* Member count + visibility */}
               {roomInfo && (
-                <div
-                  style={{
-                    fontSize: '10px',
-                    fontFamily: 'Geist Mono, monospace',
-                    color: 'rgba(224,224,240,0.5)',
-                    marginBottom: '8px',
-                    display: 'flex',
-                    gap: '8px',
-                  }}
-                >
+                <div className="mb-2 flex gap-2 font-mono text-[10px] text-swkit-muted/50">
                   <span>{roomInfo.memberCount}/{roomInfo.maxMembers} members</span>
-                  <span style={{ color: '#2a2a4a' }}>|</span>
-                  <span style={{ color: roomInfo.isPublic ? '#22c55e' : '#6b7280' }}>
+                  <span className="text-swkit-orange/20">|</span>
+                  <span className={roomInfo.isPublic ? 'text-status-active' : 'text-status-offline'}>
                     {roomInfo.isPublic ? 'Public' : 'Private'}
                   </span>
                 </div>
               )}
-
-              {/* Action buttons */}
-              <div style={{ display: 'flex', gap: '6px' }}>
+              <div className="flex gap-1.5">
                 <button
                   onClick={handleCopyCode}
                   aria-label="룸 코드 복사"
-                  style={{
-                    flex: 1,
-                    height: '22px',
-                    background: copied ? '#0a2a0a' : 'transparent',
-                    border: `1px solid ${copied ? '#22c55e' : '#2a2a4a'}`,
-                    borderRadius: 0,
-                    color: copied ? '#22c55e' : '#7070a0',
-                    fontFamily: 'Geist Mono, monospace',
-                    fontSize: '9px',
-                    cursor: 'pointer',
-                    letterSpacing: '0.05em',
-                    transition: 'background 0.15s, border-color 0.15s, color 0.15s',
-                  }}
+                  className="flex-1 cursor-pointer border border-swkit-orange/20 bg-transparent py-0.5 font-mono text-[9px] tracking-wider text-swkit-muted transition-colors hover:border-swkit-orange hover:text-swkit-orange"
+                  style={copied ? { borderColor: '#22c55e', color: '#22c55e', background: '#f0fdf4' } : undefined}
                 >
                   {copied ? '[복사됨]' : '코드 복사'}
                 </button>
                 <button
                   onClick={handleLeaveRoom}
                   aria-label="룸 나가기"
-                  style={{
-                    flex: 1,
-                    height: '22px',
-                    background: 'transparent',
-                    border: '1px solid #2a2a4a',
-                    borderRadius: 0,
-                    color: '#7070a0',
-                    fontFamily: 'Geist Mono, monospace',
-                    fontSize: '9px',
-                    cursor: 'pointer',
-                    letterSpacing: '0.05em',
-                    transition: 'border-color 0.15s, color 0.15s',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.borderColor = '#ef4444';
-                    e.currentTarget.style.color = '#ef4444';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.borderColor = '#2a2a4a';
-                    e.currentTarget.style.color = '#7070a0';
-                  }}
+                  className="flex-1 cursor-pointer border border-swkit-orange/20 bg-transparent py-0.5 font-mono text-[9px] tracking-wider text-swkit-muted transition-colors hover:border-status-blocked hover:text-status-blocked"
                 >
                   나가기
                 </button>
@@ -260,40 +152,22 @@ export function AgentSidePanel({ roomId }: Readonly<AgentSidePanelProps>) {
 
           {/* Header */}
           <div
-            style={{
-              padding: '10px 12px 8px',
-              borderBottom: '1px solid #1e1e3a',
-              fontFamily: 'Geist Mono, monospace',
-              fontSize: 11,
-              color: '#4a4a7a',
-              textTransform: 'uppercase',
-              letterSpacing: 1,
-              paddingRight: 32,
-              marginTop: roomId ? '8px' : 0,
-            }}
+            className="border-b border-swkit-orange/15 px-3 pb-2 pr-8 pt-2.5 font-mono text-[11px] uppercase tracking-wider text-swkit-muted"
+            style={{ marginTop: roomId ? '8px' : 0 }}
           >
             Agents
           </div>
 
           {/* Agent list */}
-          <div style={{ flex: 1, overflowY: 'auto', minHeight: 0 }}>
+          <div className="min-h-0 flex-1 overflow-y-auto">
             {sessionList.length === 0 && (
-              <div
-                style={{
-                  padding: '16px 12px',
-                  fontFamily: 'Geist Mono, monospace',
-                  fontSize: 11,
-                  color: '#333355',
-                  textAlign: 'center',
-                }}
-              >
+              <div className="px-3 py-4 text-center font-mono text-[11px] text-swkit-muted/40">
                 No active sessions
               </div>
             )}
             {sessionList.map((session) => {
               const isSelected = selectedAgentId === session.sessionId;
               const statusColor = STATUS_COLOR[session.status] ?? '#6b7280';
-
               const pendingApproval = approvals.find(
                 (a) =>
                   a.status === 'pending' &&
@@ -310,112 +184,55 @@ export function AgentSidePanel({ roomId }: Readonly<AgentSidePanelProps>) {
                       selectAgent(isSelected ? null : session.sessionId);
                     }
                   }}
+                  className="block w-full cursor-pointer border-none text-left"
                   style={{
-                    display: 'block',
-                    width: '100%',
-                    textAlign: 'left',
-                    background: isSelected ? '#14142a' : 'transparent',
-                    border: 'none',
-                    borderBottom: '1px solid #12121f',
+                    background: isSelected ? '#FFF8F3' : 'transparent',
+                    borderBottom: '1px solid rgba(255, 107, 44, 0.08)',
                     borderLeft: isSelected ? `2px solid ${statusColor}` : '2px solid transparent',
                     padding: '8px 10px',
-                    cursor: 'pointer',
-                    color: '#e0e0e0',
                   }}
                 >
-                  {/* Row 1: status dot + name + role */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 3 }}>
+                  {/* Row 1: status dot + name + status */}
+                  <div className="mb-0.5 flex items-center gap-1.5">
                     <span
+                      className="shrink-0 rounded-full"
                       style={{
                         width: 7,
                         height: 7,
-                        borderRadius: '50%',
                         background: statusColor,
-                        flexShrink: 0,
                         boxShadow: session.status === 'active' ? `0 0 4px ${statusColor}` : 'none',
                       }}
                     />
-                    <span
-                      style={{
-                        fontFamily: 'Geist Sans, sans-serif',
-                        fontSize: 12,
-                        fontWeight: 600,
-                        color: isSelected ? '#ffffff' : '#c0c0d8',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap',
-                        flex: 1,
-                      }}
-                    >
+                    <span className={`flex-1 overflow-hidden text-ellipsis whitespace-nowrap font-sans text-xs font-semibold ${isSelected ? 'text-swkit-dark' : 'text-swkit-dark/80'}`}>
                       {session.agentName}
                     </span>
                     {pendingApproval && (
-                      <span
-                        title="Pending approval"
-                        style={{
-                          background: '#ef4444',
-                          color: '#fff',
-                          fontSize: 8,
-                          fontWeight: 700,
-                          padding: '1px 4px',
-                          flexShrink: 0,
-                        }}
-                      >
+                      <span className="shrink-0 bg-status-blocked px-1 py-px text-[8px] font-bold text-white" title="Pending approval">
                         &#9888;
                       </span>
                     )}
                     <span
-                      style={{
-                        fontFamily: 'Geist Mono, monospace',
-                        fontSize: 9,
-                        color: pendingApproval ? '#ef4444' : statusColor,
-                        textTransform: 'uppercase',
-                      }}
+                      className="font-mono text-[9px] uppercase"
+                      style={{ color: pendingApproval ? '#ef4444' : statusColor }}
                     >
                       {pendingApproval ? 'approval' : (STATUS_LABEL[session.status] ?? session.status)}
                     </span>
                   </div>
 
                   {/* Row 2: role */}
-                  <div
-                    style={{
-                      fontFamily: 'Geist Mono, monospace',
-                      fontSize: 10,
-                      color: '#5050a0',
-                      marginBottom: 2,
-                      paddingLeft: 13,
-                    }}
-                  >
+                  <div className="mb-0.5 pl-3.5 font-mono text-[10px] text-swkit-muted">
                     {session.agentRole}
                   </div>
 
                   {/* Row 3: current tool */}
                   {session.currentTool && (
-                    <div
-                      style={{
-                        fontFamily: 'Geist Mono, monospace',
-                        fontSize: 10,
-                        color: '#4a9eff',
-                        paddingLeft: 13,
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap',
-                      }}
-                    >
+                    <div className="overflow-hidden text-ellipsis whitespace-nowrap pl-3.5 font-mono text-[10px] text-swkit-orange">
                       {truncateTool(session.currentTool)}
                     </div>
                   )}
 
                   {/* Row 4: elapsed time */}
-                  <div
-                    style={{
-                      fontFamily: 'Geist Mono, monospace',
-                      fontSize: 9,
-                      color: '#333355',
-                      paddingLeft: 13,
-                      marginTop: 2,
-                    }}
-                  >
+                  <div className="mt-0.5 pl-3.5 font-mono text-[9px] text-swkit-muted/40">
                     {formatElapsed(session.registeredAt)}
                   </div>
                 </button>

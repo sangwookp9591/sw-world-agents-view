@@ -25,7 +25,6 @@ export function ChatPanel({ roomId }: Readonly<ChatPanelProps>) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // 새 메시지 시 자동 스크롤
   useEffect(() => {
     if (!collapsed) {
       messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -68,58 +67,24 @@ export function ChatPanel({ roomId }: Readonly<ChatPanelProps>) {
   );
 
   return (
-    <div
-      style={{
-        borderTop: '1px solid #1e1e3a',
-        background: '#0a0a0f',
-        flexShrink: 0,
-      }}
-    >
+    <div className="shrink-0 border-t border-swkit-orange/15 bg-white">
       {/* 헤더 */}
       <button
         onClick={() => setCollapsed((c) => !c)}
         aria-label={collapsed ? '채팅 펼치기' : '채팅 접기'}
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          width: '100%',
-          padding: '6px 10px',
-          background: '#0f0f17',
-          border: 'none',
-          borderBottom: collapsed ? 'none' : '1px solid #1e1e3a',
-          cursor: 'pointer',
-          color: '#4a4a7a',
-          fontFamily: 'Geist Mono, monospace',
-          fontSize: 10,
-          textTransform: 'uppercase',
-          letterSpacing: 1,
-        }}
+        className="flex w-full cursor-pointer items-center justify-between border-none bg-swkit-light px-2.5 py-1.5 font-mono text-[10px] uppercase tracking-wider text-swkit-muted"
+        style={{ borderBottom: collapsed ? 'none' : '1px solid rgba(255, 107, 44, 0.15)' }}
       >
         <span>Chat</span>
-        <span style={{ fontSize: 9 }}>{collapsed ? '▲' : '▼'}</span>
+        <span className="text-[9px]">{collapsed ? '▲' : '▼'}</span>
       </button>
 
       {!collapsed && (
         <>
           {/* 메시지 목록 */}
-          <div
-            style={{
-              height: 150,
-              overflowY: 'auto',
-              padding: '4px 0',
-            }}
-          >
+          <div className="h-[150px] overflow-y-auto py-1">
             {chatMessages.length === 0 && (
-              <div
-                style={{
-                  padding: '12px 10px',
-                  fontFamily: 'Geist Mono, monospace',
-                  fontSize: 10,
-                  color: '#333355',
-                  textAlign: 'center',
-                }}
-              >
+              <div className="px-2.5 py-3 text-center font-mono text-[10px] text-swkit-muted/50">
                 No messages yet
               </div>
             )}
@@ -130,47 +95,18 @@ export function ChatPanel({ roomId }: Readonly<ChatPanelProps>) {
               return (
                 <div
                   key={msg.id}
-                  style={{
-                    padding: '3px 10px',
-                    background: '#12121e',
-                    marginBottom: 1,
-                    display: 'flex',
-                    gap: 6,
-                    alignItems: 'flex-start',
-                  }}
+                  className="mb-px flex items-start gap-1.5 bg-swkit-light/50 px-2.5 py-0.5"
                 >
                   <span
-                    style={{
-                      fontFamily: 'Geist Mono, monospace',
-                      fontSize: 10,
-                      fontWeight: 700,
-                      color,
-                      flexShrink: 0,
-                      whiteSpace: 'nowrap',
-                    }}
+                    className="shrink-0 whitespace-nowrap font-mono text-[10px] font-bold"
+                    style={{ color }}
                   >
                     [{msg.agentName}]
                   </span>
-                  <span
-                    style={{
-                      fontFamily: 'Geist Mono, monospace',
-                      fontSize: 10,
-                      color: '#e0e0f0',
-                      wordBreak: 'break-word',
-                      flex: 1,
-                    }}
-                  >
+                  <span className="flex-1 break-words font-mono text-[10px] text-swkit-dark">
                     {msg.text}
                   </span>
-                  <span
-                    style={{
-                      fontFamily: 'Geist Mono, monospace',
-                      fontSize: 9,
-                      color: '#555',
-                      flexShrink: 0,
-                      whiteSpace: 'nowrap',
-                    }}
-                  >
+                  <span className="shrink-0 whitespace-nowrap font-mono text-[9px] text-swkit-muted/50">
                     {formatTime(msg.timestamp)}
                   </span>
                 </div>
@@ -180,14 +116,7 @@ export function ChatPanel({ roomId }: Readonly<ChatPanelProps>) {
           </div>
 
           {/* 입력 영역 */}
-          <div
-            style={{
-              display: 'flex',
-              gap: 4,
-              padding: '4px 8px',
-              borderTop: '1px solid #1e1e3a',
-            }}
-          >
+          <div className="flex gap-1 border-t border-swkit-orange/15 px-2 py-1">
             <input
               ref={inputRef}
               type="text"
@@ -197,40 +126,16 @@ export function ChatPanel({ roomId }: Readonly<ChatPanelProps>) {
               placeholder="메시지 입력..."
               disabled={sending}
               aria-label="채팅 입력"
-              style={{
-                flex: 1,
-                background: '#12121e',
-                border: '1px solid #2a2a3e',
-                borderRadius: 0,
-                padding: '4px 8px',
-                color: '#e0e0f0',
-                fontFamily: 'Geist Mono, monospace',
-                fontSize: 11,
-                outline: 'none',
-                transition: 'border-color 0.15s',
-              }}
-              onFocus={(e) => {
-                e.currentTarget.style.borderColor = '#FF6B2C';
-              }}
-              onBlur={(e) => {
-                e.currentTarget.style.borderColor = '#2a2a3e';
-              }}
+              className="flex-1 border border-swkit-orange/20 bg-white px-2 py-1 font-mono text-[11px] text-swkit-dark outline-none transition-colors focus:border-swkit-orange"
             />
             <button
               onClick={() => void handleSend()}
               disabled={sending || !inputText.trim()}
               aria-label="전송"
+              className="shrink-0 cursor-pointer border-none px-2.5 py-1 font-mono text-[10px] transition-colors disabled:cursor-not-allowed disabled:bg-swkit-light disabled:text-swkit-muted/50"
               style={{
-                padding: '4px 10px',
-                background: sending || !inputText.trim() ? '#1a1a2e' : '#FF6B2C',
-                border: 'none',
-                borderRadius: 0,
-                color: sending || !inputText.trim() ? '#4a4a7a' : '#ffffff',
-                fontFamily: 'Geist Mono, monospace',
-                fontSize: 10,
-                cursor: sending || !inputText.trim() ? 'not-allowed' : 'pointer',
-                transition: 'background 0.15s, color 0.15s',
-                flexShrink: 0,
+                background: sending || !inputText.trim() ? undefined : '#FF6B2C',
+                color: sending || !inputText.trim() ? undefined : '#ffffff',
               }}
             >
               전송

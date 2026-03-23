@@ -125,12 +125,7 @@ export function OfficeView({ roomId }: Readonly<OfficeViewProps>) {
 
   return (
     <div
-      style={{
-        display: 'flex',
-        height: '100vh',
-        background: '#0a0a0f',
-        overflow: 'hidden',
-      }}
+      className="flex h-screen overflow-hidden bg-white"
     >
       {/* Left sidebar */}
       <AgentSidePanel roomId={roomId} />
