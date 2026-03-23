@@ -29,7 +29,7 @@ export default function OfficeCanvas() {
           style={{
             padding: '4px 10px',
             background: debugMode ? 'rgba(255,100,100,0.8)' : 'rgba(30,30,60,0.8)',
-            color: '#aaaaff',
+            color: '#FFB088',
             border: '1px solid #3a3a6a',
             borderRadius: 0,
             cursor: 'pointer',
@@ -44,7 +44,7 @@ export default function OfficeCanvas() {
           style={{
             padding: '4px 10px',
             background: 'rgba(30,30,60,0.8)',
-            color: '#aaaaff',
+            color: '#FFB088',
             border: '1px solid #3a3a6a',
             borderRadius: 0,
             cursor: 'pointer',

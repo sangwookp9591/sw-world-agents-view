@@ -15,7 +15,7 @@ function PageLoading() {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        color: '#4444ff',
+        color: '#FF6B2C',
         fontFamily: 'monospace',
         fontSize: '14px',
       }}

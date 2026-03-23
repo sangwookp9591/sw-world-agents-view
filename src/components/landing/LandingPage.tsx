@@ -32,7 +32,7 @@ export function LandingPage({ initialCode }: Readonly<LandingPageProps>) {
         <div
           style={{
             display: 'inline-block',
-            background: '#4444ff',
+            background: '#FF6B2C',
             padding: '8px 20px',
             marginBottom: '20px',
             boxShadow: '4px 4px 0px #1a1aaa',

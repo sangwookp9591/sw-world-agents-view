@@ -152,7 +152,7 @@ export function CharacterBillboard({
       <Text
         position={[0, 0.55, 0.01]}
         fontSize={0.10}
-        color="#aaaaff"
+        color="#FFB088"
         anchorX="center"
         anchorY="bottom"
         outlineWidth={0.015}

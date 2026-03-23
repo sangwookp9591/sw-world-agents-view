@@ -88,8 +88,8 @@ export function Monitor({ position }: Readonly<PositionProps>) {
       <mesh position={[x, y + 1.05, z + 0.011]}>
         <boxGeometry args={[0.40, 0.27, 0.001]} />
         <meshStandardMaterial
-          color="#1a3fff"
-          emissive="#1a3fff"
+          color="#FF6B2C"
+          emissive="#FF6B2C"
           emissiveIntensity={0.5}
           roughness={0.1}
         />

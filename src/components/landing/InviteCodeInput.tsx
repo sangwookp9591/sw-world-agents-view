@@ -190,7 +190,7 @@ export function InviteCodeInput({ initialCode, onJoining }: Readonly<InviteCodeI
             padding: '0 16px',
             outline: 'none',
             textTransform: 'uppercase',
-            caretColor: '#4444ff',
+            caretColor: '#FF6B2C',
             transition: 'border-color 0.15s',
           }}
         />
@@ -201,9 +201,9 @@ export function InviteCodeInput({ initialCode, onJoining }: Readonly<InviteCodeI
           style={{
             height: '56px',
             padding: '0 24px',
-            background: canJoin ? '#4444ff' : '#1e1e3a',
+            background: canJoin ? '#FF6B2C' : '#1e1e3a',
             border: '2px solid',
-            borderColor: canJoin ? '#4444ff' : '#2a2a4a',
+            borderColor: canJoin ? '#FF6B2C' : '#2a2a4a',
             borderRadius: '0px',
             color: canJoin ? '#ffffff' : '#4a4a6a',
             fontFamily: 'monospace',
@@ -215,12 +215,12 @@ export function InviteCodeInput({ initialCode, onJoining }: Readonly<InviteCodeI
           }}
           onMouseEnter={(e) => {
             if (canJoin) {
-              (e.currentTarget as HTMLButtonElement).style.background = '#6666ff';
+              (e.currentTarget as HTMLButtonElement).style.background = '#FF8F5C';
             }
           }}
           onMouseLeave={(e) => {
             if (canJoin) {
-              (e.currentTarget as HTMLButtonElement).style.background = '#4444ff';
+              (e.currentTarget as HTMLButtonElement).style.background = '#FF6B2C';
             }
           }}
         >
