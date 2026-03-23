@@ -11,14 +11,14 @@ function TestBox() {
   return (
     <mesh position={[0, 1, 0]}>
       <boxGeometry args={[2, 2, 2]} />
-      <meshStandardMaterial color="hotpink" />
+      <meshStandardMaterial color="#FF6B2C" />
     </mesh>
   );
 }
 
 export default function OfficeCanvas() {
   const [showGrid, setShowGrid] = useState(true);
-  const [debugMode, setDebugMode] = useState(false); // 풀 씬 기본
+  const [debugMode, setDebugMode] = useState(false);
 
   return (
     <div style={{ position: 'absolute', inset: 0 }}>
@@ -26,31 +26,13 @@ export default function OfficeCanvas() {
       <div style={{ position: 'absolute', top: 12, right: 12, zIndex: 10, display: 'flex', gap: 8 }}>
         <button
           onClick={() => setDebugMode((v) => !v)}
-          style={{
-            padding: '4px 10px',
-            background: debugMode ? 'rgba(255,100,100,0.8)' : 'rgba(30,30,60,0.8)',
-            color: '#FFB088',
-            border: '1px solid #3a3a6a',
-            borderRadius: 0,
-            cursor: 'pointer',
-            fontSize: 12,
-            fontFamily: 'monospace',
-          }}
+          className="cursor-pointer border border-swkit-orange/20 bg-white/80 px-2.5 py-1 font-mono text-xs text-swkit-orange backdrop-blur-sm hover:bg-swkit-light"
         >
           {debugMode ? '▶ Full Scene' : '⬛ Debug'}
         </button>
         <button
           onClick={() => setShowGrid((v) => !v)}
-          style={{
-            padding: '4px 10px',
-            background: 'rgba(30,30,60,0.8)',
-            color: '#FFB088',
-            border: '1px solid #3a3a6a',
-            borderRadius: 0,
-            cursor: 'pointer',
-            fontSize: 12,
-            fontFamily: 'monospace',
-          }}
+          className="cursor-pointer border border-swkit-orange/20 bg-white/80 px-2.5 py-1 font-mono text-xs text-swkit-orange backdrop-blur-sm hover:bg-swkit-light"
         >
           {showGrid ? 'Grid OFF' : 'Grid ON'}
         </button>
@@ -58,10 +40,10 @@ export default function OfficeCanvas() {
 
       <Canvas
         camera={{ position: [0, 15, 18], fov: 40 }}
-        style={{ background: '#0a0a0f' }}
+        style={{ background: '#faf5ef' }}
         frameloop="always"
         gl={{
-          antialias: false,
+          antialias: true,
           alpha: false,
           powerPreference: 'default',
           failIfMajorPerformanceCaveat: false,
@@ -70,20 +52,18 @@ export default function OfficeCanvas() {
           stencil: false,
         }}
         onCreated={({ gl }) => {
-          gl.setClearColor('#0a0a0f');
-          console.log('[swkit-office] WebGL initialized:', gl.getContext().getParameter(gl.getContext().RENDERER));
+          gl.setClearColor('#faf5ef');
         }}
       >
         <Suspense fallback={null}>
-          <ambientLight intensity={0.5} />
-          <directionalLight position={[5, 8, 5]} intensity={1.0} />
-
           {debugMode ? (
             <>
+              <ambientLight intensity={0.8} />
+              <directionalLight position={[5, 8, 5]} intensity={1.0} />
               <TestBox />
               <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]}>
                 <planeGeometry args={[10, 10]} />
-                <meshStandardMaterial color="#1a1a2e" />
+                <meshStandardMaterial color="#f5ebe0" />
               </mesh>
             </>
           ) : (
