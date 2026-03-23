@@ -17,90 +17,68 @@ export function LandingPage({ initialCode }: Readonly<LandingPageProps>) {
     <div
       style={{
         minHeight: '100vh',
-        background: '#0a0a0f',
+        background: '#FFFFFF',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
         padding: '40px 24px',
-        fontFamily: 'monospace',
-        color: '#e0e0f0',
+        fontFamily: 'system-ui, -apple-system, sans-serif',
+        color: '#2D3436',
       }}
     >
       {/* === Header === */}
-      <header
-        style={{
-          textAlign: 'center',
-          marginBottom: '48px',
-        }}
-      >
-        {/* Pixel-style logo block */}
+      <header style={{ textAlign: 'center', marginBottom: '48px' }}>
         <div
           style={{
             display: 'inline-block',
             background: '#FF6B2C',
-            padding: '8px 20px',
+            padding: '6px 16px',
+            borderRadius: '20px',
             marginBottom: '20px',
-            boxShadow: '4px 4px 0px #1a1aaa',
-            letterSpacing: '0.1em',
           }}
         >
-          <span
-            style={{
-              fontSize: '13px',
-              fontWeight: 'bold',
-              color: '#ffffff',
-              textTransform: 'uppercase',
-            }}
-          >
+          <span style={{ fontSize: '12px', fontWeight: 600, color: '#fff', letterSpacing: '0.05em' }}>
             v0.2.0
           </span>
         </div>
 
         <h1
           style={{
-            fontSize: 'clamp(32px, 5vw, 56px)',
-            fontWeight: 'bold',
-            fontFamily: 'monospace',
-            color: '#e0e0f0',
+            fontSize: 'clamp(32px, 5vw, 48px)',
+            fontWeight: 800,
+            color: '#2D3436',
             margin: '0 0 12px 0',
-            letterSpacing: '0.05em',
-            textShadow: '3px 3px 0px #1a1aaa',
+            letterSpacing: '-0.02em',
           }}
         >
-          swkit-office
+          sw-world{' '}
+          <span style={{ color: '#FF6B2C' }}>agents</span>
+          {' '}view
         </h1>
 
-        <p
-          style={{
-            fontSize: '16px',
-            color: '#7070a0',
-            margin: 0,
-            letterSpacing: '0.08em',
-          }}
-        >
-          AI 에이전트의 3D 사무실
+        <p style={{ fontSize: '16px', color: 'rgba(45, 52, 54, 0.6)', margin: 0 }}>
+          AI 에이전트의 3D 사무실 — 실시간 협업 시각화
         </p>
       </header>
 
-      {/* === Main card with tabs === */}
+      {/* === Main card === */}
       <main
         style={{
           width: '100%',
           maxWidth: '520px',
-          background: '#0e0e1a',
-          border: '2px solid #2a2a4a',
-          boxShadow: '6px 6px 0px #08080f',
+          background: '#FFF8F3',
+          border: '1px solid rgba(255, 107, 44, 0.2)',
+          borderRadius: '16px',
+          boxShadow: '0 4px 24px rgba(255, 107, 44, 0.08)',
           display: 'flex',
           flexDirection: 'column',
+          overflow: 'hidden',
         }}
       >
         {/* Tab bar */}
         <div
-          style={{
-            display: 'flex',
-            borderBottom: '1px solid #1e1e3a',
-          }}
+          style={{ display: 'flex', borderBottom: '1px solid rgba(255, 107, 44, 0.15)' }}
           role="tablist"
           aria-label="입장 방식 선택"
         >
@@ -121,133 +99,49 @@ export function LandingPage({ initialCode }: Readonly<LandingPageProps>) {
         </div>
 
         {/* Tab panels */}
-        <div style={{ padding: '28px 36px 36px' }}>
-          {/* Invite Code Panel */}
-          <div
-            id="panel-invite"
-            role="tabpanel"
-            aria-labelledby="tab-invite"
-            hidden={activeTab !== 'invite'}
-          >
+        <div style={{ padding: '28px 32px 36px' }}>
+          <div id="panel-invite" role="tabpanel" aria-labelledby="tab-invite" hidden={activeTab !== 'invite'}>
             {activeTab === 'invite' && (
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '24px' }}>
-                <div
-                  style={{
-                    width: '100%',
-                    borderBottom: '1px solid #1e1e3a',
-                    paddingBottom: '16px',
-                  }}
-                >
-                  <p
-                    style={{
-                      margin: 0,
-                      fontSize: '12px',
-                      color: '#4a4a7a',
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.15em',
-                    }}
-                  >
-                    {'>'} 초대 코드 입력
-                  </p>
-                </div>
-
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px' }}>
+                <p style={{ margin: 0, fontSize: '13px', color: 'rgba(45,52,54,0.5)', letterSpacing: '0.05em' }}>
+                  팀원에게 받은 초대 코드를 입력하세요
+                </p>
                 <InviteCodeInput initialCode={initialCode} />
-
-                <p
-                  style={{
-                    fontSize: '12px',
-                    color: '#3a3a5a',
-                    textAlign: 'center',
-                    margin: 0,
-                  }}
-                >
+                <p style={{ fontSize: '12px', color: 'rgba(45,52,54,0.35)', textAlign: 'center', margin: 0 }}>
                   형식: XXXX-XXXX &nbsp;|&nbsp; 예: IRON-7K2X
                 </p>
               </div>
             )}
           </div>
 
-          {/* Room Panel */}
-          <div
-            id="panel-room"
-            role="tabpanel"
-            aria-labelledby="tab-room"
-            hidden={activeTab !== 'room'}
-          >
+          <div id="panel-room" role="tabpanel" aria-labelledby="tab-room" hidden={activeTab !== 'room'}>
             {activeTab === 'room' && <RoomSection />}
           </div>
         </div>
       </main>
 
-      {/* === Footer — Create new office === */}
-      <footer
-        style={{
-          marginTop: '48px',
-          textAlign: 'center',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          gap: '16px',
-        }}
-      >
-        <div
-          style={{
-            width: '1px',
-            height: '32px',
-            background: '#1e1e3a',
-          }}
-        />
-
-        <p
-          style={{
-            fontSize: '13px',
-            color: '#4a4a6a',
-            margin: 0,
-          }}
-        >
+      {/* === Footer === */}
+      <footer style={{ marginTop: '48px', textAlign: 'center' }}>
+        <p style={{ fontSize: '14px', color: 'rgba(45,52,54,0.5)', margin: '0 0 16px 0' }}>
           또는 새 오피스 만들기
         </p>
-
-        {/* CLI install guide */}
         <div
           style={{
-            background: '#08080f',
-            border: '1px solid #1e1e3a',
+            background: '#2D3436',
+            borderRadius: '12px',
             padding: '16px 24px',
             maxWidth: '400px',
             width: '100%',
           }}
         >
-          <p
-            style={{
-              margin: '0 0 8px 0',
-              fontSize: '11px',
-              color: '#4a4a6a',
-              textTransform: 'uppercase',
-              letterSpacing: '0.1em',
-            }}
-          >
-            agent-ui CLI 설치
+          <p style={{ margin: '0 0 8px 0', fontSize: '11px', color: 'rgba(255,255,255,0.5)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+            agent-ui CLI
           </p>
-          <code
-            style={{
-              display: 'block',
-              fontSize: '13px',
-              color: '#22c55e',
-              letterSpacing: '0.02em',
-            }}
-          >
-            npx @sw-kit/agent-ui init
+          <code style={{ display: 'block', fontSize: '14px', color: '#FF6B2C', fontFamily: 'monospace' }}>
+            npx sw-world-agents-view --setup
           </code>
         </div>
-
-        <p
-          style={{
-            fontSize: '11px',
-            color: '#2e2e4e',
-            margin: 0,
-          }}
-        >
+        <p style={{ fontSize: '11px', color: 'rgba(45,52,54,0.3)', margin: '12px 0 0 0' }}>
           CLI 실행 후 생성되는 초대 코드를 위에 입력하세요
         </p>
       </footer>
@@ -275,27 +169,20 @@ function TabButton({ label, active, onClick, id, panelId }: Readonly<TabButtonPr
       onClick={onClick}
       style={{
         flex: 1,
-        height: '44px',
-        background: active ? '#12121e' : 'transparent',
+        height: '48px',
+        background: 'transparent',
         border: 'none',
         borderBottom: active ? '2px solid #FF6B2C' : '2px solid transparent',
         borderRadius: 0,
-        color: active ? '#FF6B2C' : '#4a4a7a',
-        fontFamily: 'monospace',
-        fontSize: '12px',
-        fontWeight: active ? 'bold' : 'normal',
+        color: active ? '#FF6B2C' : 'rgba(45,52,54,0.5)',
+        fontFamily: 'system-ui, sans-serif',
+        fontSize: '14px',
+        fontWeight: active ? 600 : 400,
         cursor: 'pointer',
-        letterSpacing: '0.1em',
-        textTransform: 'uppercase',
-        transition: 'color 0.15s, border-color 0.15s, background 0.15s',
-        marginBottom: '-1px',
+        transition: 'color 0.15s, border-color 0.15s',
       }}
-      onMouseEnter={(e) => {
-        if (!active) e.currentTarget.style.color = '#a0a0c0';
-      }}
-      onMouseLeave={(e) => {
-        if (!active) e.currentTarget.style.color = '#4a4a7a';
-      }}
+      onMouseEnter={(e) => { if (!active) e.currentTarget.style.color = '#2D3436'; }}
+      onMouseLeave={(e) => { if (!active) e.currentTarget.style.color = 'rgba(45,52,54,0.5)'; }}
     >
       {label}
     </button>

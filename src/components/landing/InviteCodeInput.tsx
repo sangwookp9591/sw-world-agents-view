@@ -17,7 +17,6 @@ export interface InviteCodeInputProps {
 }
 
 function formatCode(raw: string): string {
-  // Strip non-alphanumeric, uppercase, max 8 chars (XXXX-XXXX without hyphen = 8)
   const clean = raw.replace(/[^A-Za-z0-9]/g, '').toUpperCase().slice(0, 8);
   if (clean.length <= 4) return clean;
   return `${clean.slice(0, 4)}-${clean.slice(4)}`;
@@ -27,16 +26,10 @@ async function validateCode(code: string): Promise<ValidationResult> {
   const normalized = code.toUpperCase().trim();
   try {
     const res = await fetch(`/api/sessions/invite/${encodeURIComponent(normalized)}`);
-    if (res.status === 404) {
-      return { status: 'invalid' };
-    }
-    if (!res.ok) {
-      return { status: 'invalid' };
-    }
+    if (res.status === 404) return { status: 'invalid' };
+    if (!res.ok) return { status: 'invalid' };
     const data = (await res.json()) as { status: string; agentName?: string; sessionId?: string };
-    if (data.status === 'valid') {
-      return { status: 'valid', agentName: data.agentName, sessionId: data.sessionId };
-    }
+    if (data.status === 'valid') return { status: 'valid', agentName: data.agentName, sessionId: data.sessionId };
     return { status: 'invalid' };
   } catch {
     return { status: 'invalid' };
@@ -68,18 +61,11 @@ export function InviteCodeInput({ initialCode, onJoining }: Readonly<InviteCodeI
       setValidationResult(null);
       return;
     }
-
     if (debounceTimer.current) clearTimeout(debounceTimer.current);
-    debounceTimer.current = setTimeout(() => {
-      runValidation(value);
-    }, 300);
-
-    return () => {
-      if (debounceTimer.current) clearTimeout(debounceTimer.current);
-    };
+    debounceTimer.current = setTimeout(() => runValidation(value), 300);
+    return () => { if (debounceTimer.current) clearTimeout(debounceTimer.current); };
   }, [value, isComplete, runValidation]);
 
-  // Auto-validate initialCode on mount
   useEffect(() => {
     if (initialCode && formatCode(initialCode).replace('-', '').length === 8) {
       runValidation(formatCode(initialCode));
@@ -87,31 +73,25 @@ export function InviteCodeInput({ initialCode, onJoining }: Readonly<InviteCodeI
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const formatted = formatCode(e.target.value);
-    setValue(formatted);
-  };
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => setValue(formatCode(e.target.value));
 
   const handleJoin = async () => {
     if (validationStatus !== 'valid' || isJoining) return;
     setIsJoining(true);
     setJoinError(null);
     onJoining?.();
-
     try {
       const res = await fetch('/api/sessions/join', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ inviteCode: value }),
       });
-
       if (!res.ok) {
         const data = (await res.json()) as { error?: string };
         setJoinError(data.error ?? '입장에 실패했습니다');
         setIsJoining(false);
         return;
       }
-
       const data = (await res.json()) as { sessionId: string };
       router.push(`/?session=${encodeURIComponent(data.sessionId)}`);
     } catch {
@@ -126,37 +106,21 @@ export function InviteCodeInput({ initialCode, onJoining }: Readonly<InviteCodeI
 
   const borderColor = (): string => {
     switch (validationStatus) {
-      case 'valid':
-        return '#22c55e';
-      case 'invalid':
-      case 'expired':
-        return '#ef4444';
-      case 'loading':
-        return '#6b7280';
-      default:
-        return '#3a3a5c';
+      case 'valid': return '#22c55e';
+      case 'invalid': case 'expired': return '#ef4444';
+      case 'loading': return 'rgba(45,52,54,0.3)';
+      default: return 'rgba(255, 107, 44, 0.3)';
     }
   };
 
   const statusMessage = (): React.ReactNode => {
-    if (joinError) {
-      return <span style={{ color: '#ef4444' }}>ERR: {joinError}</span>;
-    }
+    if (joinError) return <span style={{ color: '#ef4444' }}>{joinError}</span>;
     switch (validationStatus) {
-      case 'loading':
-        return <span style={{ color: '#6b7280' }}>검증 중...</span>;
-      case 'valid':
-        return (
-          <span style={{ color: '#22c55e' }}>
-            [OK] {validationResult?.agentName}의 세션 — 입장 가능
-          </span>
-        );
-      case 'invalid':
-        return <span style={{ color: '#ef4444' }}>[ERR] 유효하지 않은 코드</span>;
-      case 'expired':
-        return <span style={{ color: '#ef4444' }}>[ERR] 만료된 코드</span>;
-      default:
-        return null;
+      case 'loading': return <span style={{ color: 'rgba(45,52,54,0.5)' }}>검증 중...</span>;
+      case 'valid': return <span style={{ color: '#22c55e' }}>{validationResult?.agentName}의 세션 — 입장 가능</span>;
+      case 'invalid': return <span style={{ color: '#ef4444' }}>유효하지 않은 코드</span>;
+      case 'expired': return <span style={{ color: '#ef4444' }}>만료된 코드</span>;
+      default: return null;
     }
   };
 
@@ -164,7 +128,6 @@ export function InviteCodeInput({ initialCode, onJoining }: Readonly<InviteCodeI
 
   return (
     <div style={{ width: '100%', maxWidth: '480px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-      {/* Input row */}
       <div style={{ display: 'flex', gap: '8px' }}>
         <input
           type="text"
@@ -179,19 +142,26 @@ export function InviteCodeInput({ initialCode, onJoining }: Readonly<InviteCodeI
           aria-label="초대 코드 입력"
           style={{
             flex: 1,
-            height: '56px',
-            background: '#12121e',
+            height: '52px',
+            background: '#FFFFFF',
             border: `2px solid ${borderColor()}`,
-            borderRadius: '0px',
-            color: '#e0e0f0',
+            borderRadius: '12px',
+            color: '#2D3436',
             fontFamily: 'monospace',
-            fontSize: '22px',
+            fontSize: '20px',
             letterSpacing: '0.15em',
             padding: '0 16px',
             outline: 'none',
             textTransform: 'uppercase',
             caretColor: '#FF6B2C',
-            transition: 'border-color 0.15s',
+            transition: 'border-color 0.15s, box-shadow 0.15s',
+            boxShadow: validationStatus === 'valid' ? '0 0 0 3px rgba(34,197,94,0.1)' : 'none',
+          }}
+          onFocus={(e) => {
+            if (validationStatus === 'idle') e.currentTarget.style.borderColor = '#FF6B2C';
+          }}
+          onBlur={(e) => {
+            if (validationStatus === 'idle') e.currentTarget.style.borderColor = 'rgba(255,107,44,0.3)';
           }}
         />
         <button
@@ -199,46 +169,27 @@ export function InviteCodeInput({ initialCode, onJoining }: Readonly<InviteCodeI
           disabled={!canJoin}
           aria-label="입장하기"
           style={{
-            height: '56px',
+            height: '52px',
             padding: '0 24px',
-            background: canJoin ? '#FF6B2C' : '#1e1e3a',
-            border: '2px solid',
-            borderColor: canJoin ? '#FF6B2C' : '#2a2a4a',
-            borderRadius: '0px',
-            color: canJoin ? '#ffffff' : '#4a4a6a',
-            fontFamily: 'monospace',
+            background: canJoin ? '#FF6B2C' : 'rgba(45,52,54,0.1)',
+            border: 'none',
+            borderRadius: '12px',
+            color: canJoin ? '#ffffff' : 'rgba(45,52,54,0.3)',
+            fontFamily: 'system-ui, sans-serif',
             fontSize: '14px',
-            fontWeight: 'bold',
+            fontWeight: 600,
             cursor: canJoin ? 'pointer' : 'not-allowed',
             whiteSpace: 'nowrap',
-            transition: 'background 0.15s, border-color 0.15s',
+            transition: 'background 0.15s',
           }}
-          onMouseEnter={(e) => {
-            if (canJoin) {
-              (e.currentTarget as HTMLButtonElement).style.background = '#FF8F5C';
-            }
-          }}
-          onMouseLeave={(e) => {
-            if (canJoin) {
-              (e.currentTarget as HTMLButtonElement).style.background = '#FF6B2C';
-            }
-          }}
+          onMouseEnter={(e) => { if (canJoin) e.currentTarget.style.background = '#FF8F5C'; }}
+          onMouseLeave={(e) => { if (canJoin) e.currentTarget.style.background = '#FF6B2C'; }}
         >
-          {isJoining ? '입장 중...' : '입장하기'}
+          {isJoining ? '입장 중...' : '입장하기 →'}
         </button>
       </div>
 
-      {/* Status message */}
-      <div
-        style={{
-          fontFamily: 'monospace',
-          fontSize: '13px',
-          minHeight: '18px',
-          paddingLeft: '2px',
-        }}
-        role="status"
-        aria-live="polite"
-      >
+      <div style={{ fontSize: '13px', minHeight: '18px', paddingLeft: '4px' }} role="status" aria-live="polite">
         {statusMessage()}
       </div>
     </div>
