@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useOfficeStore } from '@/stores/office-store';
+import { ChatPanel } from '@/components/chat/ChatPanel';
 
 const STATUS_COLOR: Record<string, string> = {
   active: '#22c55e',
@@ -275,7 +276,7 @@ export function AgentSidePanel({ roomId }: Readonly<AgentSidePanelProps>) {
           </div>
 
           {/* Agent list */}
-          <div style={{ flex: 1, overflowY: 'auto' }}>
+          <div style={{ flex: 1, overflowY: 'auto', minHeight: 0 }}>
             {sessionList.length === 0 && (
               <div
                 style={{
@@ -421,6 +422,9 @@ export function AgentSidePanel({ roomId }: Readonly<AgentSidePanelProps>) {
               );
             })}
           </div>
+
+          {/* Chat panel */}
+          <ChatPanel roomId={roomId} />
         </>
       )}
     </div>

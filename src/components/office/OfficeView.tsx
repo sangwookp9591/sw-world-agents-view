@@ -57,6 +57,7 @@ export function OfficeView({ roomId }: Readonly<OfficeViewProps>) {
   const addSession = useOfficeStore((s) => s.addSession);
   const removeSession = useOfficeStore((s) => s.removeSession);
   const updateSessionStatus = useOfficeStore((s) => s.updateSessionStatus);
+  const addChatMessage = useOfficeStore((s) => s.addChatMessage);
 
   const [terminalEvents, setTerminalEvents] = useState<AgentEvent[]>([]);
 
@@ -86,13 +87,26 @@ export function OfficeView({ roomId }: Readonly<OfficeViewProps>) {
       } else if (event.eventType === 'status_change') {
         const status = event.payload?.status as Parameters<typeof updateSessionStatus>[1] | undefined;
         if (status) updateSessionStatus(event.sessionId, status);
+      } else if (event.eventType === 'chat_message') {
+        const agentId = (event.payload?.agentId as string) ?? event.sessionId;
+        const agentName = (event.payload?.agentName as string) ?? event.agentName;
+        const text = event.payload?.text as string | undefined;
+        if (text) {
+          addChatMessage({
+            id: `${event.timestamp}-${agentId}`,
+            agentId,
+            agentName,
+            text,
+            timestamp: event.timestamp,
+          });
+        }
       }
 
       if (TERMINAL_EVENT_TYPES.has(event.eventType)) {
         setTerminalEvents((prev) => [...prev, event]);
       }
     },
-    [roomId, addApproval, removeApproval, addSession, removeSession, updateSessionStatus],
+    [roomId, addApproval, removeApproval, addSession, removeSession, updateSessionStatus, addChatMessage],
   );
 
   useSessionEvents(handleEvent);

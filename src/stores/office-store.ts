@@ -3,12 +3,24 @@ import type { AgentState } from '@/types/agent';
 import type { RegisteredSession, ApprovalRequest } from '@/types/session';
 import type { Room } from '@/lib/relay/room-registry';
 
+export interface ChatMessage {
+  id: string;
+  agentId: string;
+  agentName: string;
+  text: string;
+  timestamp: number;
+}
+
 interface OfficeStore {
   agents: Map<string, AgentState>;
   selectedAgentId: string | null;
   sessions: Map<string, RegisteredSession>;
   sidebarOpen: boolean;
   hoveredAgentId: string | null;
+
+  // Chat state
+  chatMessages: ChatMessage[];
+  addChatMessage: (msg: ChatMessage) => void;
 
   // Room state
   currentRoomId: string | null;
@@ -54,6 +66,7 @@ export const useOfficeStore = create<OfficeStore>((set) => ({
   currentRoom: null,
   approvals: [],
   activeApprovalId: null,
+  chatMessages: [],
 
   addAgent: (agent) =>
     set((state) => {
@@ -125,4 +138,9 @@ export const useOfficeStore = create<OfficeStore>((set) => ({
     })),
 
   setActiveApproval: (id) => set({ activeApprovalId: id }),
+
+  addChatMessage: (msg) =>
+    set((state) => ({
+      chatMessages: [...state.chatMessages.slice(-199), msg],
+    })),
 }));

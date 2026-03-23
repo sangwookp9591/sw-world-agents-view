@@ -32,7 +32,8 @@ export interface AgentEvent {
     | 'status_change'
     | 'unregister'
     | 'approval_request'
-    | 'approval_resolved';
+    | 'approval_resolved'
+    | 'chat_message';
   toolName?: string;
   timestamp: number;
   payload?: Record<string, unknown>;
