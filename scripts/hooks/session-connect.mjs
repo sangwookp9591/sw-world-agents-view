@@ -2,7 +2,11 @@
 /**
  * swkit-office SessionStart hook
  * Claude Code 세션이 시작되면 자동으로 3D Office에 등록합니다.
- * --remote-control 사용 시 RC URL도 함께 등록합니다.
+ *
+ * 단계:
+ *   1. 세션 ID 추출 & 서버 연결 확인
+ *   2. 세션 등록 (Remote Control 자동 감지)
+ *   3. 세션 URL + 상태 정보 출력
  *
  * 설정: settings.json → hooks.SessionStart
  */
@@ -17,10 +21,18 @@ async function register() {
     const input = JSON.parse(await readStdin());
     const sessionId = input.session_id || `session-${Date.now()}`;
 
-    // Claude Code의 Remote Control URL 감지
-    // --remote-control 모드에서 CLAUDE_REMOTE_CONTROL_URL 환경변수가 설정됨
-    const remoteControlUrl = process.env.CLAUDE_REMOTE_CONTROL_URL || undefined;
+    // Step 1: 서버 연결 확인
+    const serverOk = await checkServer(RELAY_URL);
+    if (!serverOk) {
+      console.error('[swkit-3d] ⚠ Office 서버 연결 불가 — 오프라인 모드');
+      return;
+    }
 
+    // Step 2: Remote Control 감지
+    const remoteControlUrl = process.env.CLAUDE_REMOTE_CONTROL_URL || undefined;
+    const rcEnabled = !!remoteControlUrl;
+
+    // Step 3: 세션 등록
     const body = {
       sessionId,
       userId: process.env.USER || 'unknown',
@@ -30,10 +42,9 @@ async function register() {
       status: 'active',
       registeredAt: Date.now(),
       lastEventAt: Date.now(),
-      // 세션 공유 설정
       sharing: {
-        enabled: true,                              // 기본: 팀 전체 공유
-        allowRemoteControl: !!remoteControlUrl,      // RC URL 있으면 원격 제어 허용
+        enabled: true,
+        allowRemoteControl: rcEnabled,
         remoteControlUrl: remoteControlUrl || null,
       },
     };
@@ -47,12 +58,42 @@ async function register() {
       body: JSON.stringify(body),
     });
 
-    if (res.ok) {
-      const rcMsg = remoteControlUrl ? ' (RC enabled)' : '';
-      console.error(`[swkit-3d] Session registered: ${AGENT_NAME}${rcMsg} (${sessionId})`);
+    if (!res.ok) {
+      console.error('[swkit-3d] ❌ 세션 등록 실패');
+      return;
     }
+
+    // Step 4: 상태 정보 출력
+    const sessionUrl = `${RELAY_URL}?session=${sessionId}`;
+
+    console.error('');
+    console.error('[swkit-3d] ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    console.error(`[swkit-3d]  🏢 3D Office 연결됨`);
+    console.error('[swkit-3d] ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    console.error(`[swkit-3d]  👤 Agent: ${AGENT_NAME} (${AGENT_ROLE})`);
+    console.error(`[swkit-3d]  🏷  Team:  ${TEAM_ID}`);
+    console.error(`[swkit-3d]  🔗 URL:   ${sessionUrl}`);
+
+    if (rcEnabled) {
+      console.error(`[swkit-3d]  🎮 RC:    활성화됨`);
+    } else {
+      console.error(`[swkit-3d]  🎮 RC:    비활성화 (--remote-control 플래그로 활성화)`);
+    }
+
+    console.error('[swkit-3d] ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    console.error('');
+
   } catch {
     // 연결 실패 시 무시 (Office가 실행 안 중일 수 있음)
+  }
+}
+
+async function checkServer(url) {
+  try {
+    const res = await fetch(url, { signal: AbortSignal.timeout(2000) });
+    return res.ok;
+  } catch {
+    return false;
   }
 }
 
