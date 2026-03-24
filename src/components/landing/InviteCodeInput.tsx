@@ -36,6 +36,17 @@ async function validateCode(code: string): Promise<ValidationResult> {
   }
 }
 
+/** 유효성 상태에 따른 입력 테두리 클래스 */
+function inputBorderClass(status: ValidationStatus): string {
+  switch (status) {
+    case 'valid':   return 'border-status-active shadow-[0_0_0_3px_rgba(34,197,94,0.1)]';
+    case 'invalid':
+    case 'expired': return 'border-status-blocked';
+    case 'loading': return 'border-office-border';
+    default:        return 'border-swkit-orange/30 focus:border-swkit-orange';
+  }
+}
+
 export function InviteCodeInput({ initialCode, onJoining }: Readonly<InviteCodeInputProps>) {
   const router = useRouter();
   const [value, setValue] = useState(initialCode ? formatCode(initialCode) : '');
@@ -104,31 +115,22 @@ export function InviteCodeInput({ initialCode, onJoining }: Readonly<InviteCodeI
     if (e.key === 'Enter') handleJoin();
   };
 
-  const borderColor = (): string => {
-    switch (validationStatus) {
-      case 'valid': return '#22c55e';
-      case 'invalid': case 'expired': return '#ef4444';
-      case 'loading': return 'rgba(45,52,54,0.3)';
-      default: return 'rgba(255, 107, 44, 0.3)';
-    }
-  };
-
-  const statusMessage = (): React.ReactNode => {
-    if (joinError) return <span style={{ color: '#ef4444' }}>{joinError}</span>;
-    switch (validationStatus) {
-      case 'loading': return <span style={{ color: 'rgba(45,52,54,0.5)' }}>검증 중...</span>;
-      case 'valid': return <span style={{ color: '#22c55e' }}>{validationResult?.agentName}의 세션 — 입장 가능</span>;
-      case 'invalid': return <span style={{ color: '#ef4444' }}>유효하지 않은 코드</span>;
-      case 'expired': return <span style={{ color: '#ef4444' }}>만료된 코드</span>;
-      default: return null;
-    }
-  };
-
   const canJoin = validationStatus === 'valid' && !isJoining;
 
+  const statusMessage = (): React.ReactNode => {
+    if (joinError) return <span className="text-status-blocked">{joinError}</span>;
+    switch (validationStatus) {
+      case 'loading': return <span className="text-office-muted">검증 중...</span>;
+      case 'valid':   return <span className="text-status-active">{validationResult?.agentName}의 세션 — 입장 가능</span>;
+      case 'invalid': return <span className="text-status-blocked">유효하지 않은 코드</span>;
+      case 'expired': return <span className="text-status-blocked">만료된 코드</span>;
+      default:        return null;
+    }
+  };
+
   return (
-    <div style={{ width: '100%', maxWidth: '480px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-      <div style={{ display: 'flex', gap: '8px' }}>
+    <div className="w-full max-w-lg flex flex-col gap-3">
+      <div className="flex gap-2">
         <input
           type="text"
           value={value}
@@ -140,56 +142,30 @@ export function InviteCodeInput({ initialCode, onJoining }: Readonly<InviteCodeI
           autoComplete="off"
           autoCapitalize="characters"
           aria-label="초대 코드 입력"
-          style={{
-            flex: 1,
-            height: '52px',
-            background: '#FFFFFF',
-            border: `2px solid ${borderColor()}`,
-            borderRadius: '12px',
-            color: '#2D3436',
-            fontFamily: 'monospace',
-            fontSize: '20px',
-            letterSpacing: '0.15em',
-            padding: '0 16px',
-            outline: 'none',
-            textTransform: 'uppercase',
-            caretColor: '#FF6B2C',
-            transition: 'border-color 0.15s, box-shadow 0.15s',
-            boxShadow: validationStatus === 'valid' ? '0 0 0 3px rgba(34,197,94,0.1)' : 'none',
-          }}
-          onFocus={(e) => {
-            if (validationStatus === 'idle') e.currentTarget.style.borderColor = '#FF6B2C';
-          }}
-          onBlur={(e) => {
-            if (validationStatus === 'idle') e.currentTarget.style.borderColor = 'rgba(255,107,44,0.3)';
-          }}
+          className={[
+            'flex-1 h-13 bg-office-surface border-2 rounded-xl',
+            'text-office-text font-mono text-xl tracking-widest px-4 outline-none',
+            'uppercase caret-swkit-orange transition-[border-color,box-shadow] duration-150',
+            inputBorderClass(validationStatus),
+          ].join(' ')}
         />
         <button
           onClick={handleJoin}
           disabled={!canJoin}
           aria-label="입장하기"
-          style={{
-            height: '52px',
-            padding: '0 24px',
-            background: canJoin ? '#FF6B2C' : 'rgba(45,52,54,0.1)',
-            border: 'none',
-            borderRadius: '12px',
-            color: canJoin ? '#ffffff' : 'rgba(45,52,54,0.3)',
-            fontFamily: 'system-ui, sans-serif',
-            fontSize: '14px',
-            fontWeight: 600,
-            cursor: canJoin ? 'pointer' : 'not-allowed',
-            whiteSpace: 'nowrap',
-            transition: 'background 0.15s',
-          }}
-          onMouseEnter={(e) => { if (canJoin) e.currentTarget.style.background = '#FF8F5C'; }}
-          onMouseLeave={(e) => { if (canJoin) e.currentTarget.style.background = '#FF6B2C'; }}
+          className={[
+            'h-13 px-6 rounded-xl text-sm font-semibold font-sans whitespace-nowrap',
+            'transition-colors duration-150',
+            canJoin
+              ? 'bg-swkit-orange text-white cursor-pointer hover:bg-swkit-orange-hover'
+              : 'bg-office-elevated text-office-dim cursor-not-allowed',
+          ].join(' ')}
         >
           {isJoining ? '입장 중...' : '입장하기 →'}
         </button>
       </div>
 
-      <div style={{ fontSize: '13px', minHeight: '18px', paddingLeft: '4px' }} role="status" aria-live="polite">
+      <div className="text-[13px] min-h-[18px] pl-1 text-office-muted" role="status" aria-live="polite">
         {statusMessage()}
       </div>
     </div>

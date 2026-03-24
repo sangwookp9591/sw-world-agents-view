@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { useOfficeStore } from '@/stores/office-store';
 import { AgentSidePanel } from '@/components/ui/AgentSidePanel';
@@ -8,7 +8,7 @@ import { StatusBar } from '@/components/ui/StatusBar';
 import { TerminalPanel } from '@/components/terminal/TerminalPanel';
 import { ApprovalModal } from '@/components/ui/ApprovalModal';
 import { useSessionEvents } from '@/hooks/useSessionEvents';
-import type { AgentEvent, ApprovalRequest } from '@/types/session';
+import type { AgentEvent, ApprovalRequest, RegisteredSession } from '@/types/session';
 
 const OfficeCanvas = dynamic(
   () => import('@/components/office/OfficeCanvas'),
@@ -44,9 +44,14 @@ const TERMINAL_EVENT_TYPES = new Set([
 export interface OfficeViewProps {
   readonly sessionId?: string;
   readonly roomId?: string;
+  readonly projectName?: string;
+  readonly userName?: string;
+  readonly teamId?: string;
+  readonly initialAgents?: Array<{ name: string; actions: number; status: string }>;
+  readonly initialPipeline?: { phase: string; task: string; progress: number | null };
 }
 
-export function OfficeView({ roomId }: Readonly<OfficeViewProps>) {
+export function OfficeView({ roomId, projectName, initialAgents, initialPipeline }: Readonly<OfficeViewProps>) {
   const selectedAgentId = useOfficeStore((s) => s.selectedAgentId);
   const selectAgent = useOfficeStore((s) => s.selectAgent);
   const approvals = useOfficeStore((s) => s.approvals);
@@ -58,8 +63,38 @@ export function OfficeView({ roomId }: Readonly<OfficeViewProps>) {
   const removeSession = useOfficeStore((s) => s.removeSession);
   const updateSessionStatus = useOfficeStore((s) => s.updateSessionStatus);
   const addChatMessage = useOfficeStore((s) => s.addChatMessage);
+  const setProjectName = useOfficeStore((s) => s.setProjectName);
+  const setPipelinePhase = useOfficeStore((s) => s.setPipelinePhase);
 
   const [terminalEvents, setTerminalEvents] = useState<AgentEvent[]>([]);
+
+  // Initialize store from URL-provided props on mount
+  useEffect(() => {
+    if (projectName) setProjectName(projectName);
+  }, [projectName, setProjectName]);
+
+  useEffect(() => {
+    if (initialPipeline?.phase) setPipelinePhase(initialPipeline.phase);
+  }, [initialPipeline, setPipelinePhase]);
+
+  useEffect(() => {
+    if (!initialAgents || initialAgents.length === 0) return;
+    const now = Date.now();
+    initialAgents.forEach((agent, index) => {
+      const session: RegisteredSession = {
+        sessionId: `init-${index}-${agent.name}`,
+        userId: 'url-init',
+        agentRole: agent.name,
+        agentName: agent.name,
+        status: (agent.status as RegisteredSession['status']) ?? 'idle',
+        registeredAt: now,
+        lastEventAt: now,
+      };
+      addSession(session);
+    });
+  // Run only on initial mount — initialAgents is from URL params and won't change
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleEvent = useCallback(
     (event: AgentEvent) => {

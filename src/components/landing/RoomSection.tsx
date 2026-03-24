@@ -98,62 +98,27 @@ export function RoomSection({ onEntering }: Readonly<RoomSectionProps>) {
     [router],
   );
 
+  const canEnterByCode = Boolean(roomCodeInput.trim()) && !isEntering;
+
   return (
-    <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+    <div className="w-full flex flex-col gap-5">
       {/* Create Room Button */}
       <button
         onClick={() => setShowCreateModal(true)}
         aria-label="새 룸 만들기"
-        style={{
-          width: '100%',
-          height: '48px',
-          background: '#FF6B2C',
-          border: '2px solid #FF6B2C',
-          borderRadius: 0,
-          color: '#ffffff',
-          fontFamily: 'monospace',
-          fontSize: '14px',
-          fontWeight: 'bold',
-          cursor: 'pointer',
-          letterSpacing: '0.05em',
-          transition: 'background 0.15s, border-color 0.15s',
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.background = '#FF8F5C';
-          e.currentTarget.style.borderColor = '#FF8F5C';
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.background = '#FF6B2C';
-          e.currentTarget.style.borderColor = '#FF6B2C';
-        }}
+        className="w-full h-12 bg-swkit-orange border-2 border-swkit-orange text-white font-mono text-sm font-bold tracking-wider cursor-pointer transition-colors duration-150 hover:bg-swkit-orange-hover hover:border-swkit-orange-hover rounded-lg"
       >
         + 룸 만들기
       </button>
 
       {/* Public Room List */}
       <section aria-label="공개 룸 목록">
-        <div
-          style={{
-            fontSize: '11px',
-            color: '#4a4a7a',
-            textTransform: 'uppercase',
-            letterSpacing: '0.15em',
-            marginBottom: '12px',
-          }}
-        >
+        <div className="text-xs text-office-dim uppercase tracking-[0.15em] mb-3">
           공개 룸
         </div>
 
         {isLoadingRooms && (
-          <div
-            style={{
-              padding: '20px 0',
-              textAlign: 'center',
-              fontFamily: 'monospace',
-              fontSize: '12px',
-              color: '#4a4a7a',
-            }}
-          >
+          <div className="py-5 text-center font-mono text-xs text-office-dim">
             불러오는 중...
           </div>
         )}
@@ -161,32 +126,12 @@ export function RoomSection({ onEntering }: Readonly<RoomSectionProps>) {
         {!isLoadingRooms && loadError && (
           <div
             role="alert"
-            style={{
-              padding: '16px',
-              border: '1px solid #3a1a1a',
-              background: '#1a0a0a',
-              fontFamily: 'monospace',
-              fontSize: '12px',
-              color: '#ef4444',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              gap: '12px',
-            }}
+            className="px-4 py-3 border border-error-border bg-error-bg font-mono text-xs text-status-blocked flex items-center justify-between gap-3"
           >
             <span>{loadError}</span>
             <button
               onClick={fetchPublicRooms}
-              style={{
-                background: 'transparent',
-                border: '1px solid #ef4444',
-                borderRadius: 0,
-                color: '#ef4444',
-                fontFamily: 'monospace',
-                fontSize: '11px',
-                cursor: 'pointer',
-                padding: '2px 8px',
-              }}
+              className="bg-transparent border border-status-blocked text-status-blocked font-mono text-xs cursor-pointer px-2 py-0.5 hover:bg-status-blocked/10 transition-colors duration-150"
             >
               재시도
             </button>
@@ -194,21 +139,13 @@ export function RoomSection({ onEntering }: Readonly<RoomSectionProps>) {
         )}
 
         {!isLoadingRooms && !loadError && rooms.length === 0 && (
-          <div
-            style={{
-              padding: '24px 0',
-              textAlign: 'center',
-              fontFamily: 'monospace',
-              fontSize: '12px',
-              color: '#333355',
-            }}
-          >
+          <div className="py-6 text-center font-mono text-xs text-office-faint">
             아직 공개 룸이 없습니다
           </div>
         )}
 
         {!isLoadingRooms && !loadError && rooms.length > 0 && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <div className="flex flex-col gap-2">
             {rooms.map((room) => (
               <RoomCard
                 key={room.id}
@@ -223,99 +160,41 @@ export function RoomSection({ onEntering }: Readonly<RoomSectionProps>) {
 
       {/* Private Room Code Entry */}
       <section aria-label="비공개 룸 입장">
-        <div
-          style={{
-            fontSize: '11px',
-            color: '#4a4a7a',
-            textTransform: 'uppercase',
-            letterSpacing: '0.15em',
-            marginBottom: '12px',
-          }}
-        >
+        <div className="text-xs text-office-dim uppercase tracking-[0.15em] mb-3">
           룸 코드로 입장
         </div>
 
-        <div style={{ display: 'flex', gap: '8px' }}>
+        <div className="flex gap-2">
           <input
             type="text"
             value={roomCodeInput}
             onChange={(e) => setRoomCodeInput(formatRoomCode(e.target.value))}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') handleEnterByCode();
-            }}
+            onKeyDown={(e) => { if (e.key === 'Enter') handleEnterByCode(); }}
             placeholder="SWKIT-A1B2"
             maxLength={12}
             spellCheck={false}
             autoComplete="off"
             autoCapitalize="characters"
             aria-label="룸 코드 입력"
-            style={{
-              flex: 1,
-              height: '44px',
-              background: '#12121e',
-              border: '2px solid #2a2a3e',
-              borderRadius: 0,
-              color: '#e0e0f0',
-              fontFamily: 'monospace',
-              fontSize: '16px',
-              letterSpacing: '0.1em',
-              padding: '0 12px',
-              outline: 'none',
-              textTransform: 'uppercase',
-              caretColor: '#FF6B2C',
-              transition: 'border-color 0.15s',
-            }}
-            onFocus={(e) => {
-              e.currentTarget.style.borderColor = '#FF6B2C';
-            }}
-            onBlur={(e) => {
-              e.currentTarget.style.borderColor = '#2a2a3e';
-            }}
+            className="flex-1 h-11 bg-office-surface border-2 border-office-border text-office-text font-mono text-base tracking-wider px-3 outline-none uppercase caret-swkit-orange transition-[border-color] duration-150 focus:border-swkit-orange"
           />
           <button
             onClick={handleEnterByCode}
-            disabled={!roomCodeInput.trim() || isEntering}
+            disabled={!canEnterByCode}
             aria-label="룸 코드로 입장"
-            style={{
-              height: '44px',
-              padding: '0 20px',
-              background: roomCodeInput.trim() && !isEntering ? '#FF6B2C' : '#1e1e3a',
-              border: '2px solid',
-              borderColor: roomCodeInput.trim() && !isEntering ? '#FF6B2C' : '#2a2a4a',
-              borderRadius: 0,
-              color: roomCodeInput.trim() && !isEntering ? '#ffffff' : '#4a4a6a',
-              fontFamily: 'monospace',
-              fontSize: '13px',
-              fontWeight: 'bold',
-              cursor: roomCodeInput.trim() && !isEntering ? 'pointer' : 'not-allowed',
-              whiteSpace: 'nowrap',
-              transition: 'background 0.15s, border-color 0.15s',
-            }}
-            onMouseEnter={(e) => {
-              if (roomCodeInput.trim() && !isEntering) {
-                e.currentTarget.style.background = '#FF8F5C';
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (roomCodeInput.trim() && !isEntering) {
-                e.currentTarget.style.background = '#FF6B2C';
-              }
-            }}
+            className={[
+              'h-11 px-5 font-mono text-[13px] font-bold whitespace-nowrap border-2 transition-colors duration-150',
+              canEnterByCode
+                ? 'bg-swkit-orange border-swkit-orange text-white cursor-pointer hover:bg-swkit-orange-hover hover:border-swkit-orange-hover'
+                : 'bg-office-action-disabled border-office-action-disabled-border text-office-action-disabled-text cursor-not-allowed',
+            ].join(' ')}
           >
             {isEntering ? '입장 중...' : '입장'}
           </button>
         </div>
 
         {enterError && (
-          <div
-            role="alert"
-            style={{
-              marginTop: '8px',
-              fontFamily: 'monospace',
-              fontSize: '12px',
-              color: '#ef4444',
-            }}
-          >
+          <div role="alert" className="mt-2 font-mono text-xs text-status-blocked">
             [ERR] {enterError}
           </div>
         )}
@@ -340,54 +219,15 @@ interface RoomCardProps {
 
 function RoomCard({ room, onEnter, disabled }: Readonly<RoomCardProps>) {
   return (
-    <div
-      style={{
-        background: '#12121e',
-        border: '1px solid #2a2a3e',
-        padding: '14px 16px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        gap: '12px',
-        transition: 'border-color 0.15s',
-      }}
-      onMouseEnter={(e) => {
-        (e.currentTarget as HTMLDivElement).style.borderColor = '#FF6B2C';
-      }}
-      onMouseLeave={(e) => {
-        (e.currentTarget as HTMLDivElement).style.borderColor = '#2a2a3e';
-      }}
-    >
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div
-          style={{
-            fontFamily: 'monospace',
-            fontSize: '14px',
-            fontWeight: 'bold',
-            color: '#e0e0f0',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap',
-            marginBottom: '6px',
-          }}
-        >
+    <div className="bg-office-surface border border-office-border px-4 py-3.5 flex items-center justify-between gap-3 transition-[border-color] duration-150 hover:border-swkit-orange">
+      <div className="flex-1 min-w-0">
+        <div className="font-mono text-sm font-bold text-office-text truncate mb-1.5">
           {room.name}
         </div>
-        <div
-          style={{
-            fontFamily: 'monospace',
-            fontSize: '11px',
-            color: 'rgba(224,224,240,0.6)',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '10px',
-          }}
-        >
-          <span>
-            {room.memberCount}/{room.maxMembers} members
-          </span>
-          <span style={{ color: '#2a2a3e' }}>|</span>
-          <span style={{ color: room.isPublic ? '#22c55e' : '#6b7280' }}>
+        <div className="font-mono text-xs text-office-muted flex items-center gap-2.5">
+          <span>{room.memberCount}/{room.maxMembers} members</span>
+          <span className="text-office-border">|</span>
+          <span className={room.isPublic ? 'text-status-active' : 'text-status-offline'}>
             {room.isPublic ? 'Public' : 'Private'}
           </span>
         </div>
@@ -397,34 +237,14 @@ function RoomCard({ room, onEnter, disabled }: Readonly<RoomCardProps>) {
         onClick={() => onEnter(room.id)}
         disabled={disabled}
         aria-label={`${room.name} 룸 입장하기`}
-        style={{
-          height: '36px',
-          padding: '0 16px',
-          background: 'transparent',
-          border: '1px solid #FF6B2C',
-          borderRadius: 0,
-          color: '#FF6B2C',
-          fontFamily: 'monospace',
-          fontSize: '12px',
-          fontWeight: 'bold',
-          cursor: disabled ? 'not-allowed' : 'pointer',
-          whiteSpace: 'nowrap',
-          flexShrink: 0,
-          transition: 'background 0.15s, color 0.15s',
-          opacity: disabled ? 0.5 : 1,
-        }}
-        onMouseEnter={(e) => {
-          if (!disabled) {
-            e.currentTarget.style.background = '#FF6B2C';
-            e.currentTarget.style.color = '#ffffff';
-          }
-        }}
-        onMouseLeave={(e) => {
-          if (!disabled) {
-            e.currentTarget.style.background = 'transparent';
-            e.currentTarget.style.color = '#FF6B2C';
-          }
-        }}
+        className={[
+          'h-9 px-4 bg-transparent border border-swkit-orange text-swkit-orange',
+          'font-mono text-xs font-bold whitespace-nowrap flex-shrink-0',
+          'transition-[background,color] duration-150',
+          disabled
+            ? 'cursor-not-allowed opacity-50'
+            : 'cursor-pointer hover:bg-swkit-orange hover:text-white',
+        ].join(' ')}
       >
         입장하기 &rarr;
       </button>

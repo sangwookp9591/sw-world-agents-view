@@ -1,8 +1,10 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import { InviteCodeInput } from './InviteCodeInput';
 import { RoomSection } from './RoomSection';
+import { AGENT_CONFIG, AGENT_SCREEN_COLORS } from '@/lib/colors';
 
 export interface LandingPageProps {
   readonly initialCode?: string | null;
@@ -14,71 +16,40 @@ export function LandingPage({ initialCode }: Readonly<LandingPageProps>) {
   const [activeTab, setActiveTab] = useState<ActiveTab>('invite');
 
   return (
-    <div
-      style={{
-        minHeight: '100vh',
-        background: '#FFFFFF',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '40px 24px',
-        fontFamily: 'system-ui, -apple-system, sans-serif',
-        color: '#2D3436',
-      }}
-    >
+    <div className="min-h-screen bg-office-bg flex flex-col items-center justify-center px-6 py-10 font-sans text-office-text">
       {/* === Header === */}
-      <header style={{ textAlign: 'center', marginBottom: '48px' }}>
-        <div
-          style={{
-            display: 'inline-block',
-            background: '#FF6B2C',
-            padding: '6px 16px',
-            borderRadius: '20px',
-            marginBottom: '20px',
-          }}
-        >
-          <span style={{ fontSize: '12px', fontWeight: 600, color: '#fff', letterSpacing: '0.05em' }}>
-            v0.2.0
+      <header className="text-center mb-12">
+        <div className="inline-block bg-swkit-orange px-4 py-1 rounded-full mb-5">
+          <span className="text-xs font-semibold text-white tracking-widest uppercase">
+            sw-kit v2.2.3
           </span>
         </div>
 
-        <h1
-          style={{
-            fontSize: 'clamp(32px, 5vw, 48px)',
-            fontWeight: 800,
-            color: '#2D3436',
-            margin: '0 0 12px 0',
-            letterSpacing: '-0.02em',
-          }}
-        >
-          sw-world{' '}
-          <span style={{ color: '#FF6B2C' }}>agents</span>
-          {' '}view
+        <h1 className="text-4xl sm:text-5xl font-extrabold text-office-text tracking-tight mb-3">
+          sw-kit{' '}
+          <span className="text-swkit-orange">Agent</span>
+          {' '}Office
         </h1>
 
-        <p style={{ fontSize: '16px', color: 'rgba(45, 52, 54, 0.6)', margin: 0 }}>
-          AI 에이전트의 3D 사무실 — 실시간 협업 시각화
+        <p className="text-sm text-office-muted">
+          10명의 에이전트가 일하는 3D 오피스
         </p>
       </header>
 
+      {/* === Agent Avatars === */}
+      <div className="mb-10 w-full max-w-xl">
+        <div className="flex flex-wrap justify-center gap-3">
+          {AGENT_CONFIG.map((agent) => (
+            <AgentAvatar key={agent.id} id={agent.id} name={agent.name} />
+          ))}
+        </div>
+      </div>
+
       {/* === Main card === */}
-      <main
-        style={{
-          width: '100%',
-          maxWidth: '520px',
-          background: '#FFF8F3',
-          border: '1px solid rgba(255, 107, 44, 0.2)',
-          borderRadius: '16px',
-          boxShadow: '0 4px 24px rgba(255, 107, 44, 0.08)',
-          display: 'flex',
-          flexDirection: 'column',
-          overflow: 'hidden',
-        }}
-      >
+      <main className="w-full max-w-xl bg-office-surface border border-office-border rounded-2xl shadow-lg shadow-swkit-orange/5 overflow-hidden">
         {/* Tab bar */}
         <div
-          style={{ display: 'flex', borderBottom: '1px solid rgba(255, 107, 44, 0.15)' }}
+          className="flex border-b border-office-border"
           role="tablist"
           aria-label="입장 방식 선택"
         >
@@ -99,53 +70,121 @@ export function LandingPage({ initialCode }: Readonly<LandingPageProps>) {
         </div>
 
         {/* Tab panels */}
-        <div style={{ padding: '28px 32px 36px' }}>
-          <div id="panel-invite" role="tabpanel" aria-labelledby="tab-invite" hidden={activeTab !== 'invite'}>
+        <div className="px-8 pt-7 pb-9">
+          <div
+            id="panel-invite"
+            role="tabpanel"
+            aria-labelledby="tab-invite"
+            hidden={activeTab !== 'invite'}
+          >
             {activeTab === 'invite' && (
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px' }}>
-                <p style={{ margin: 0, fontSize: '13px', color: 'rgba(45,52,54,0.5)', letterSpacing: '0.05em' }}>
+              <div className="flex flex-col items-center gap-5">
+                <p className="text-xs text-office-muted tracking-wider m-0">
                   팀원에게 받은 초대 코드를 입력하세요
                 </p>
                 <InviteCodeInput initialCode={initialCode} />
-                <p style={{ fontSize: '12px', color: 'rgba(45,52,54,0.35)', textAlign: 'center', margin: 0 }}>
+                <p className="text-xs text-office-dim text-center m-0">
                   형식: XXXX-XXXX &nbsp;|&nbsp; 예: IRON-7K2X
                 </p>
               </div>
             )}
           </div>
 
-          <div id="panel-room" role="tabpanel" aria-labelledby="tab-room" hidden={activeTab !== 'room'}>
+          <div
+            id="panel-room"
+            role="tabpanel"
+            aria-labelledby="tab-room"
+            hidden={activeTab !== 'room'}
+          >
             {activeTab === 'room' && <RoomSection />}
           </div>
         </div>
       </main>
 
       {/* === Footer === */}
-      <footer style={{ marginTop: '48px', textAlign: 'center' }}>
-        <p style={{ fontSize: '14px', color: 'rgba(45,52,54,0.5)', margin: '0 0 16px 0' }}>
+      <footer className="mt-12 text-center w-full max-w-sm">
+        <p className="text-sm text-office-muted mb-4">
           또는 새 오피스 만들기
         </p>
-        <div
-          style={{
-            background: '#2D3436',
-            borderRadius: '12px',
-            padding: '16px 24px',
-            maxWidth: '400px',
-            width: '100%',
-          }}
-        >
-          <p style={{ margin: '0 0 8px 0', fontSize: '11px', color: 'rgba(255,255,255,0.5)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+        <div className="bg-office-elevated rounded-xl px-6 py-4 border border-office-border">
+          <p className="text-xs text-office-muted uppercase tracking-widest mb-2">
             agent-ui CLI
           </p>
-          <code style={{ display: 'block', fontSize: '14px', color: '#FF6B2C', fontFamily: 'monospace' }}>
+          <code className="block text-sm text-swkit-orange font-mono">
             npx sw-world-agents-view --setup
           </code>
         </div>
-        <p style={{ fontSize: '11px', color: 'rgba(45,52,54,0.3)', margin: '12px 0 0 0' }}>
+        <p className="text-xs text-office-dim mt-3">
           CLI 실행 후 생성되는 초대 코드를 위에 입력하세요
         </p>
       </footer>
     </div>
+  );
+}
+
+/* ---- Agent Avatar ---- */
+
+interface AgentAvatarProps {
+  readonly id: string;
+  readonly name: string;
+}
+
+function AgentAvatar({ id, name }: Readonly<AgentAvatarProps>) {
+  const screenColor = AGENT_SCREEN_COLORS[id] ?? '#FF6B2C';
+
+  return (
+    <div className="flex flex-col items-center gap-1.5 group" title={name}>
+      <div
+        className="w-10 h-10 rounded-xl bg-office-elevated border border-office-border flex items-center justify-center overflow-hidden transition-all duration-150 group-hover:border-swkit-orange group-hover:scale-110"
+        aria-label={`${name} 에이전트`}
+      >
+        <AgentSvgIcon id={id} color={screenColor} />
+      </div>
+      <span className="text-xs text-office-dim group-hover:text-office-text transition-colors duration-150">
+        {name}
+      </span>
+    </div>
+  );
+}
+
+/* ---- Agent SVG Icon — 인라인 fallback ---- */
+
+interface AgentSvgIconProps {
+  readonly id: string;
+  readonly color: string;
+}
+
+function AgentSvgIcon({ id, color }: Readonly<AgentSvgIconProps>) {
+  const initials = id.slice(0, 2).toUpperCase();
+  return (
+    <svg
+      width="28"
+      height="28"
+      viewBox="0 0 28 28"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+    >
+      {/* Monitor body */}
+      <rect x="3" y="4" width="22" height="14" rx="2" fill={color} fillOpacity="0.15" stroke={color} strokeWidth="1.2" />
+      {/* Screen */}
+      <rect x="5" y="6" width="18" height="10" rx="1" fill={color} fillOpacity="0.25" />
+      {/* Stand */}
+      <rect x="12" y="18" width="4" height="3" fill={color} fillOpacity="0.4" />
+      <rect x="9" y="21" width="10" height="1.5" rx="0.75" fill={color} fillOpacity="0.4" />
+      {/* Initials on screen */}
+      <text
+        x="14"
+        y="13"
+        textAnchor="middle"
+        fontSize="5.5"
+        fontWeight="700"
+        fontFamily="monospace"
+        fill={color}
+      >
+        {initials}
+      </text>
+    </svg>
   );
 }
 
@@ -167,22 +206,12 @@ function TabButton({ label, active, onClick, id, panelId }: Readonly<TabButtonPr
       aria-selected={active}
       aria-controls={panelId}
       onClick={onClick}
-      style={{
-        flex: 1,
-        height: '48px',
-        background: 'transparent',
-        border: 'none',
-        borderBottom: active ? '2px solid #FF6B2C' : '2px solid transparent',
-        borderRadius: 0,
-        color: active ? '#FF6B2C' : 'rgba(45,52,54,0.5)',
-        fontFamily: 'system-ui, sans-serif',
-        fontSize: '14px',
-        fontWeight: active ? 600 : 400,
-        cursor: 'pointer',
-        transition: 'color 0.15s, border-color 0.15s',
-      }}
-      onMouseEnter={(e) => { if (!active) e.currentTarget.style.color = '#2D3436'; }}
-      onMouseLeave={(e) => { if (!active) e.currentTarget.style.color = 'rgba(45,52,54,0.5)'; }}
+      className={[
+        'flex-1 h-12 bg-transparent border-none text-sm font-sans cursor-pointer transition-all duration-150',
+        active
+          ? 'text-swkit-orange border-b-2 border-swkit-orange font-semibold'
+          : 'text-office-dim border-b-2 border-transparent font-normal hover:text-office-text',
+      ].join(' ')}
     >
       {label}
     </button>

@@ -27,6 +27,12 @@ interface OfficeStore {
   currentRoom: Room | null;
   setCurrentRoom: (room: Room | null) => void;
 
+  // Project/pipeline state
+  projectName: string | null;
+  pipelinePhase: string | null;
+  setProjectName: (name: string) => void;
+  setPipelinePhase: (phase: string) => void;
+
   // Approval state
   approvals: ApprovalRequest[];
   activeApprovalId: string | null;
@@ -64,6 +70,8 @@ export const useOfficeStore = create<OfficeStore>((set) => ({
   hoveredAgentId: null,
   currentRoomId: null,
   currentRoom: null,
+  projectName: null,
+  pipelinePhase: null,
   approvals: [],
   activeApprovalId: null,
   chatMessages: [],
@@ -125,6 +133,9 @@ export const useOfficeStore = create<OfficeStore>((set) => ({
       });
       return { sessions: next };
     }),
+
+  setProjectName: (name) => set({ projectName: name }),
+  setPipelinePhase: (phase) => set({ pipelinePhase: phase }),
 
   addApproval: (approval) =>
     set((state) => ({

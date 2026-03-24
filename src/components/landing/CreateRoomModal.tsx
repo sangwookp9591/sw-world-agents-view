@@ -37,7 +37,6 @@ export function CreateRoomModal({ onClose, onCreated }: Readonly<CreateRoomModal
     nameInputRef.current?.focus();
   }, []);
 
-  // Close on Escape key
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
@@ -103,6 +102,8 @@ export function CreateRoomModal({ onClose, onCreated }: Readonly<CreateRoomModal
     onCreated(createdRoom.id);
   }, [createdRoom, onCreated]);
 
+  const canSubmit = Boolean(name.trim()) && !isSubmitting;
+
   return (
     <div
       ref={backdropRef}
@@ -110,80 +111,29 @@ export function CreateRoomModal({ onClose, onCreated }: Readonly<CreateRoomModal
       role="dialog"
       aria-modal="true"
       aria-label="룸 만들기"
-      style={{
-        position: 'fixed',
-        inset: 0,
-        background: 'rgba(0,0,0,0.7)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        zIndex: 1000,
-        padding: '24px',
-      }}
+      className="fixed inset-0 bg-black/70 flex items-center justify-center z-[1000] p-6"
     >
       <div
-        style={{
-          width: '100%',
-          maxWidth: '480px',
-          background: '#0a0a0f',
-          border: '2px solid #FF6B2C',
-          boxShadow: '6px 6px 0px rgba(255,107,44,0.2)',
-          display: 'flex',
-          flexDirection: 'column',
-          fontFamily: 'monospace',
-          color: '#e0e0f0',
-        }}
+        className="w-full max-w-lg bg-office-bg border-2 border-swkit-orange shadow-[6px_6px_0px_rgba(255,107,44,0.2)] flex flex-col font-mono text-office-text"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal Header */}
-        <div
-          style={{
-            padding: '16px 20px',
-            borderBottom: '1px solid #2a2a3e',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-          }}
-        >
-          <span
-            style={{
-              fontSize: '13px',
-              color: '#FF6B2C',
-              textTransform: 'uppercase',
-              letterSpacing: '0.15em',
-              fontWeight: 'bold',
-            }}
-          >
+        <div className="px-5 py-4 border-b border-office-border flex items-center justify-between">
+          <span className="text-[13px] text-swkit-orange uppercase tracking-[0.15em] font-bold">
             {'>'} 룸 만들기
           </span>
           <button
             onClick={onClose}
             aria-label="모달 닫기"
-            style={{
-              background: 'transparent',
-              border: '1px solid #2a2a3e',
-              borderRadius: 0,
-              color: '#7070a0',
-              fontFamily: 'monospace',
-              fontSize: '14px',
-              cursor: 'pointer',
-              width: '24px',
-              height: '24px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              padding: 0,
-              lineHeight: 1,
-            }}
+            className="bg-transparent border border-office-border text-office-dim font-mono text-sm cursor-pointer w-6 h-6 flex items-center justify-center p-0 leading-none hover:border-office-border-muted hover:text-office-muted transition-colors duration-150"
           >
             &times;
           </button>
         </div>
 
         {/* Modal Body */}
-        <div style={{ padding: '24px 20px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        <div className="px-5 py-6 flex flex-col gap-5">
           {createdRoom ? (
-            /* Success state */
             <SuccessView
               room={createdRoom}
               copied={copied}
@@ -192,7 +142,6 @@ export function CreateRoomModal({ onClose, onCreated }: Readonly<CreateRoomModal
               onClose={onClose}
             />
           ) : (
-            /* Form state */
             <>
               {/* Room Name */}
               <FormField label="룸 이름" required>
@@ -201,22 +150,14 @@ export function CreateRoomModal({ onClose, onCreated }: Readonly<CreateRoomModal
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value.slice(0, 128))}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') handleSubmit();
-                  }}
+                  onKeyDown={(e) => { if (e.key === 'Enter') handleSubmit(); }}
                   placeholder="예: 결제 시스템 개발"
                   maxLength={128}
                   aria-label="룸 이름"
                   aria-required="true"
-                  style={inputStyle}
-                  onFocus={(e) => {
-                    e.currentTarget.style.borderColor = '#FF6B2C';
-                  }}
-                  onBlur={(e) => {
-                    e.currentTarget.style.borderColor = '#2a2a3e';
-                  }}
+                  className="w-full h-11 bg-office-surface border-2 border-office-border text-office-text font-mono text-sm px-3 outline-none caret-swkit-orange transition-[border-color] duration-150 focus:border-swkit-orange box-border"
                 />
-                <div style={{ fontSize: '10px', color: '#4a4a7a', textAlign: 'right', marginTop: '4px' }}>
+                <div className="text-[10px] text-office-dim text-right mt-1">
                   {name.length}/128
                 </div>
               </FormField>
@@ -233,7 +174,7 @@ export function CreateRoomModal({ onClose, onCreated }: Readonly<CreateRoomModal
 
               {/* Max Members */}
               <FormField label="최대 인원">
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div className="flex items-center gap-3">
                   <input
                     type="number"
                     value={maxMembers}
@@ -244,17 +185,9 @@ export function CreateRoomModal({ onClose, onCreated }: Readonly<CreateRoomModal
                     min={1}
                     max={50}
                     aria-label="최대 인원"
-                    style={{ ...inputStyle, width: '80px', textAlign: 'center' }}
-                    onFocus={(e) => {
-                      e.currentTarget.style.borderColor = '#FF6B2C';
-                    }}
-                    onBlur={(e) => {
-                      e.currentTarget.style.borderColor = '#2a2a3e';
-                    }}
+                    className="w-20 h-11 bg-office-surface border-2 border-office-border text-office-text font-mono text-sm text-center outline-none caret-swkit-orange transition-[border-color] duration-150 focus:border-swkit-orange box-border"
                   />
-                  <span style={{ fontSize: '12px', color: 'rgba(224,224,240,0.6)' }}>
-                    명 (1 ~ 50)
-                  </span>
+                  <span className="text-xs text-office-muted">명 (1 ~ 50)</span>
                 </div>
               </FormField>
 
@@ -272,75 +205,31 @@ export function CreateRoomModal({ onClose, onCreated }: Readonly<CreateRoomModal
               {error && (
                 <div
                   role="alert"
-                  style={{
-                    padding: '10px 12px',
-                    background: '#1a0a0a',
-                    border: '1px solid #3a1a1a',
-                    fontFamily: 'monospace',
-                    fontSize: '12px',
-                    color: '#ef4444',
-                  }}
+                  className="px-3 py-2.5 bg-error-bg border border-error-border font-mono text-xs text-status-blocked"
                 >
                   [ERR] {error}
                 </div>
               )}
 
               {/* Actions */}
-              <div style={{ display: 'flex', gap: '10px', marginTop: '4px' }}>
+              <div className="flex gap-2.5 mt-1">
                 <button
                   onClick={handleSubmit}
-                  disabled={!name.trim() || isSubmitting}
+                  disabled={!canSubmit}
                   aria-label="룸 만들기"
-                  style={{
-                    flex: 1,
-                    height: '44px',
-                    background: name.trim() && !isSubmitting ? '#FF6B2C' : '#1e1e3a',
-                    border: '2px solid',
-                    borderColor: name.trim() && !isSubmitting ? '#FF6B2C' : '#2a2a4a',
-                    borderRadius: 0,
-                    color: name.trim() && !isSubmitting ? '#ffffff' : '#4a4a6a',
-                    fontFamily: 'monospace',
-                    fontSize: '14px',
-                    fontWeight: 'bold',
-                    cursor: name.trim() && !isSubmitting ? 'pointer' : 'not-allowed',
-                    transition: 'background 0.15s, border-color 0.15s',
-                  }}
-                  onMouseEnter={(e) => {
-                    if (name.trim() && !isSubmitting) {
-                      e.currentTarget.style.background = '#FF8F5C';
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (name.trim() && !isSubmitting) {
-                      e.currentTarget.style.background = '#FF6B2C';
-                    }
-                  }}
+                  className={[
+                    'flex-1 h-11 border-2 font-mono text-sm font-bold transition-[background,border-color] duration-150',
+                    canSubmit
+                      ? 'bg-swkit-orange border-swkit-orange text-white cursor-pointer hover:bg-swkit-orange-hover hover:border-swkit-orange-hover'
+                      : 'bg-office-action-disabled border-office-action-disabled-border text-office-action-disabled-text cursor-not-allowed',
+                  ].join(' ')}
                 >
                   {isSubmitting ? '생성 중...' : '만들기'}
                 </button>
                 <button
                   onClick={onClose}
                   aria-label="취소"
-                  style={{
-                    height: '44px',
-                    padding: '0 20px',
-                    background: 'transparent',
-                    border: '2px solid #2a2a3e',
-                    borderRadius: 0,
-                    color: '#7070a0',
-                    fontFamily: 'monospace',
-                    fontSize: '14px',
-                    cursor: 'pointer',
-                    transition: 'border-color 0.15s, color 0.15s',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.borderColor = '#4a4a7a';
-                    e.currentTarget.style.color = '#a0a0c0';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.borderColor = '#2a2a3e';
-                    e.currentTarget.style.color = '#7070a0';
-                  }}
+                  className="h-11 px-5 bg-transparent border-2 border-office-border text-office-dim font-mono text-sm cursor-pointer transition-[border-color,color] duration-150 hover:border-office-border-muted hover:text-office-muted"
                 >
                   취소
                 </button>
@@ -363,17 +252,10 @@ interface FormFieldProps {
 
 function FormField({ label, required, children }: Readonly<FormFieldProps>) {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-      <label
-        style={{
-          fontSize: '11px',
-          color: '#4a4a7a',
-          textTransform: 'uppercase',
-          letterSpacing: '0.12em',
-        }}
-      >
+    <div className="flex flex-col gap-2">
+      <label className="text-[11px] text-office-dim uppercase tracking-[0.12em]">
         {label}
-        {required && <span style={{ color: '#FF6B2C', marginLeft: '4px' }}>*</span>}
+        {required && <span className="text-swkit-orange ml-1">*</span>}
       </label>
       {children}
     </div>
@@ -389,38 +271,28 @@ interface ToggleRowProps {
 
 function ToggleRow({ label, checked, onChange, id }: Readonly<ToggleRowProps>) {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+    <div className="flex items-center gap-3">
       <button
         id={id}
         role="switch"
         aria-checked={checked}
         onClick={() => onChange(!checked)}
-        style={{
-          width: '40px',
-          height: '22px',
-          background: checked ? '#FF6B2C' : '#1e1e3a',
-          border: `2px solid ${checked ? '#FF6B2C' : '#2a2a4a'}`,
-          borderRadius: 0,
-          cursor: 'pointer',
-          position: 'relative',
-          flexShrink: 0,
-          transition: 'background 0.15s, border-color 0.15s',
-          padding: 0,
-        }}
+        className={[
+          'w-10 h-[22px] border-2 cursor-pointer relative flex-shrink-0 p-0',
+          'transition-[background,border-color] duration-150',
+          checked
+            ? 'bg-swkit-orange border-swkit-orange'
+            : 'bg-office-action-disabled border-office-action-disabled-border',
+        ].join(' ')}
       >
         <span
-          style={{
-            position: 'absolute',
-            top: '2px',
-            left: checked ? '18px' : '2px',
-            width: '14px',
-            height: '14px',
-            background: '#ffffff',
-            transition: 'left 0.15s',
-          }}
+          className={[
+            'absolute top-0.5 w-3.5 h-3.5 bg-white transition-[left] duration-150',
+            checked ? 'left-[18px]' : 'left-0.5',
+          ].join(' ')}
         />
       </button>
-      <span style={{ fontSize: '13px', color: 'rgba(224,224,240,0.6)' }}>{label}</span>
+      <span className="text-[13px] text-office-muted">{label}</span>
     </div>
   );
 }
@@ -435,105 +307,51 @@ interface SuccessViewProps {
 
 function SuccessView({ room, copied, onCopy, onEnter, onClose }: Readonly<SuccessViewProps>) {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-      <div
-        style={{
-          padding: '16px',
-          background: '#0a1a0a',
-          border: '1px solid #1a3a1a',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '8px',
-        }}
-      >
-        <div style={{ fontSize: '11px', color: '#22c55e', textTransform: 'uppercase', letterSpacing: '0.12em' }}>
+    <div className="flex flex-col gap-5">
+      <div className="p-4 bg-success-bg border border-success-border flex flex-col gap-2">
+        <div className="text-[11px] text-status-active uppercase tracking-[0.12em]">
           [OK] 룸 생성 완료
         </div>
-        <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#e0e0f0' }}>{room.name}</div>
+        <div className="text-lg font-bold text-office-text">{room.name}</div>
       </div>
 
       {/* Room code display */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-        <div style={{ fontSize: '11px', color: '#4a4a7a', textTransform: 'uppercase', letterSpacing: '0.12em' }}>
+      <div className="flex flex-col gap-2">
+        <div className="text-[11px] text-office-dim uppercase tracking-[0.12em]">
           룸 코드
         </div>
-        <div style={{ display: 'flex', gap: '8px', alignItems: 'stretch' }}>
-          <div
-            style={{
-              flex: 1,
-              padding: '12px 16px',
-              background: '#12121e',
-              border: '2px solid #FF6B2C',
-              fontSize: '20px',
-              fontWeight: 'bold',
-              color: '#FF6B2C',
-              letterSpacing: '0.15em',
-              textAlign: 'center',
-            }}
-          >
+        <div className="flex gap-2 items-stretch">
+          <div className="flex-1 px-4 py-3 bg-office-surface border-2 border-swkit-orange text-xl font-bold text-swkit-orange tracking-[0.15em] text-center">
             {room.code}
           </div>
           <button
             onClick={onCopy}
             aria-label="룸 코드 복사"
-            style={{
-              padding: '0 16px',
-              background: copied ? '#0a2a0a' : '#1e1e3a',
-              border: `2px solid ${copied ? '#22c55e' : '#2a2a4a'}`,
-              borderRadius: 0,
-              color: copied ? '#22c55e' : '#7070a0',
-              fontFamily: 'monospace',
-              fontSize: '12px',
-              cursor: 'pointer',
-              whiteSpace: 'nowrap',
-              transition: 'background 0.15s, border-color 0.15s, color 0.15s',
-            }}
+            className={[
+              'px-4 border-2 font-mono text-xs cursor-pointer whitespace-nowrap',
+              'transition-[background,border-color,color] duration-150',
+              copied
+                ? 'bg-success-bg border-success-border text-status-active'
+                : 'bg-office-action-disabled border-office-action-disabled-border text-office-dim hover:border-office-border-muted',
+            ].join(' ')}
           >
             {copied ? '[복사됨]' : '코드 복사'}
           </button>
         </div>
       </div>
 
-      <div style={{ display: 'flex', gap: '10px' }}>
+      <div className="flex gap-2.5">
         <button
           onClick={onEnter}
           aria-label="룸 입장하기"
-          style={{
-            flex: 1,
-            height: '44px',
-            background: '#FF6B2C',
-            border: '2px solid #FF6B2C',
-            borderRadius: 0,
-            color: '#ffffff',
-            fontFamily: 'monospace',
-            fontSize: '14px',
-            fontWeight: 'bold',
-            cursor: 'pointer',
-            transition: 'background 0.15s',
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.background = '#FF8F5C';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.background = '#FF6B2C';
-          }}
+          className="flex-1 h-11 bg-swkit-orange border-2 border-swkit-orange text-white font-mono text-sm font-bold cursor-pointer transition-colors duration-150 hover:bg-swkit-orange-hover hover:border-swkit-orange-hover"
         >
           룸 입장하기 &rarr;
         </button>
         <button
           onClick={onClose}
           aria-label="닫기"
-          style={{
-            height: '44px',
-            padding: '0 20px',
-            background: 'transparent',
-            border: '2px solid #2a2a3e',
-            borderRadius: 0,
-            color: '#7070a0',
-            fontFamily: 'monospace',
-            fontSize: '14px',
-            cursor: 'pointer',
-          }}
+          className="h-11 px-5 bg-transparent border-2 border-office-border text-office-dim font-mono text-sm cursor-pointer hover:border-office-border-muted transition-[border-color] duration-150"
         >
           닫기
         </button>
@@ -541,19 +359,3 @@ function SuccessView({ room, copied, onCopy, onEnter, onClose }: Readonly<Succes
     </div>
   );
 }
-
-const inputStyle: React.CSSProperties = {
-  width: '100%',
-  height: '44px',
-  background: '#12121e',
-  border: '2px solid #2a2a3e',
-  borderRadius: 0,
-  color: '#e0e0f0',
-  fontFamily: 'monospace',
-  fontSize: '14px',
-  padding: '0 12px',
-  outline: 'none',
-  caretColor: '#FF6B2C',
-  transition: 'border-color 0.15s',
-  boxSizing: 'border-box',
-};
